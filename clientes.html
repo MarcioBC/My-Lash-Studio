@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Novo Cliente</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: auto;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        label {
+            text-align: left;
+            font-weight: bold;
+            color: #555;
+        }
+        /* Ajustei para input[type="text"] e input[type="tel"] para ser genérico */
+        input[type="text"],
+        input[type="tel"] { 
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .back-button {
+            background-color: #6c757d;
+            margin-top: 20px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            color: white;
+        }
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+        #message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Adicionar Novo Cliente</h2>
+        <form id="addClientForm">
+            <label for="nome">Nome do Cliente:</label>
+            <input type="text" id="nome" required>
+
+            <label for="telefone">Telefone/Celular:</label>
+            <input type="tel" id="telefone" placeholder="(XX) XXXXX-XXXX" required>
+
+            <button type="submit">Adicionar Cliente</button>
+        </form>
+        <div id="message"></div>
+        <a href="dashboard.html" class="back-button">Voltar ao Dashboard</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addClientForm = document.getElementById('addClientForm');
+            const messageDiv = document.getElementById('message');
+
+            addClientForm.addEventListener('submit', async function(event) {
+                event.preventDefault(); // Impede o recarregamento da página
+
+                const nome = document.getElementById('nome').value;
+                // Alteração: de email para telefone
+                const telefone = document.getElementById('telefone').value; 
+
+                // Validação simples
+                if (!nome.trim() || !telefone.trim()) {
+                    showMessage('Por favor, preencha o nome e o telefone.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/clients', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        // Alteração: de email para phone
+                        body: JSON.stringify({ name: nome, phone: telefone }) 
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showMessage(data.message, 'success');
+                        addClientForm.reset(); // Limpa o formulário após o sucesso
+                    } else {
+                        showMessage(data.message || 'Erro ao adicionar cliente.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Erro ao adicionar cliente:', error);
+                    showMessage('Erro de conexão ou servidor.', 'error');
+                }
+            });
+
+            function showMessage(msg, type) {
+                messageDiv.textContent = msg;
+                messageDiv.className = ''; // Limpa classes existentes
+                messageDiv.classList.add(type === 'success' ? 'message-success' : 'message-error');
+                messageDiv.style.display = 'block'; // Mostra a mensagem
+                setTimeout(() => {
+                    messageDiv.style.display = 'none'; // Esconde a mensagem após um tempo
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios de Agendamentos</title>
+    
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6; /* Fundo mais suave */
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px; /* Aumentado para melhor visualização da tabela */
+            margin: 30px auto; /* Mais espaçamento superior */
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra mais suave */
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px; /* Reduzida para o botão de voltar */
+            font-size: 2.2em;
+        }
+        
+        /* Estilo para o botão Voltar ao Dashboard */
+        .back-to-dashboard-btn {
+            display: block; /* Ocupa a própria linha */
+            width: fit-content; /* Largura se ajusta ao conteúdo */
+            margin: -10px auto 30px auto; /* Centraliza e ajusta margens */
+            background-color: #5b6a7a; /* Um cinza mais neutro para o botão de voltar */
+            padding: 10px 20px;
+            text-decoration: none; /* Remove sublinhado se for um link */
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 1em;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-to-dashboard-btn:hover {
+            background-color: #4a5764;
+            transform: translateY(-1px);
+        }
+
+        .back-to-dashboard-btn:active {
+            transform: translateY(0);
+        }
+
+
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        /* Estilo para a barra de controles e botões */
+        .controls {
+            display: flex;
+            flex-wrap: wrap; /* Permite que os itens quebrem linha */
+            gap: 15px; /* Espaçamento entre os itens */
+            margin-bottom: 30px;
+            align-items: flex-end; /* Alinha os itens pela base (útil para input+label) */
+            justify-content: center; /* Centraliza os itens */
+        }
+
+        /* Grupo para label e input de data */
+        .date-control-group {
+            display: flex;
+            flex-direction: column; /* Label acima do input */
+            align-items: flex-start;
+            gap: 5px; /* Espaço entre label e input */
+        }
+
+        .controls label {
+            font-weight: bold;
+            color: #555;
+            font-size: 0.95em; /* Ligeiramente menor para um visual mais limpo */
+            margin-bottom: 0; /* Remove margem padrão */
+        }
+
+        .controls input[type="date"] {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            outline: none;
+            width: 170px; /* Largura fixa para o input de data */
+        }
+
+        .controls input[type="date"]:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Estilo para TODOS os botões - Garante tamanho uniforme */
+        button {
+            background-color: #3498db; /* Azul vibrante */
+            color: white;
+            padding: 12px 18px; /* Padding ajustado para uniformidade */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em; /* Tamanho da fonte uniforme */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para botões */
+            min-width: 160px; /* Largura MÍNIMA para uniformizar os botões */
+            text-align: center; /* Centraliza o texto */
+            flex-grow: 1; /* Permite que os botões cresçam se necessário, mas min-width define o base */
+            flex-basis: auto; /* Permite que o flexbox decida a largura inicial */
+        }
+        
+        /* Ajuste específico para os botões do tipo de agendamento se eles forem muito longos */
+        #btnPendentes, #btnConfirmados, #btnCancelados {
+            min-width: 200px; /* Um pouco mais largo para acomodar o texto */
+        }
+
+
+        button:hover {
+            background-color: #2980b9; /* Azul mais escuro no hover */
+            transform: translateY(-2px); /* Pequeno efeito de elevação */
+        }
+
+        button:active {
+            background-color: #2471a3;
+            transform: translateY(0);
+        }
+
+        /* Estilo para a área de conteúdo do relatório */
+        #relatorioContent {
+            background-color: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 25px;
+            min-height: 150px; /* Altura mínima para visualização */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Alinha conteúdo ao topo */
+            align-items: flex-start; /* Alinha conteúdo à esquerda */
+            overflow-x: auto; /* Permite scroll horizontal para tabelas grandes */
+        }
+
+        .no-data-message {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            width: 100%; /* Centraliza a mensagem */
+            margin-top: 20px;
+        }
+
+        /* Estilo da Tabela */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px 15px; /* Mais padding para células */
+            text-align: left;
+        }
+
+        th {
+            background-color: #eef4f7; /* Fundo para o cabeçalho da tabela */
+            color: #444;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* Linhas zebradas */
+        }
+
+        tr:hover {
+            background-color: #f1f1f1; /* Efeito hover nas linhas */
+        }
+
+        /* Estilo para mensagens de erro */
+        .error-message {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* Media Queries para Responsividade */
+        @media (max-width: 900px) { /* Ajuste o breakpoint para mais itens */
+            .controls {
+                justify-content: flex-start; /* Alinha à esquerda em telas menores */
+            }
+            button {
+                min-width: unset; /* Remove min-width para maior flexibilidade */
+                width: 100%; /* Botões ocupam largura total em telas menores */
+                flex-basis: auto; /* Deixa o flexbox decidir */
+            }
+             #btnPendentes, #btnConfirmados, #btnCancelados {
+                min-width: unset; /* Também remove */
+            }
+            .date-control-group {
+                width: 100%; /* O grupo de data ocupa a largura total */
+            }
+            .controls input[type="date"] {
+                width: 100%; /* Input de data ocupa largura total */
+                max-width: unset; /* Remove max-width */
+            }
+            .back-to-dashboard-btn {
+                width: 100%; /* Ocupa largura total em telas menores */
+                text-align: center;
+            }
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            button {
+                font-size: 0.9em; /* Ajusta fonte para telas menores */
+                padding: 10px 15px;
+            }
+
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Relatórios de Agendamentos</h1>
+        
+        <a href="dashboard.html" class="back-to-dashboard-btn">Voltar ao Dashboard</a>
+
+        <div class="controls">
+            <button id="btnPendentes">Agendamentos Pendentes</button>
+            <button id="btnConfirmados">Agendamentos Confirmados</button>
+            <button id="btnCancelados">Agendamentos Cancelados</button>
+            
+            <div class="date-control-group">
+                <label for="reportDate">Data de Referência</label>
+                <input type="date" id="reportDate">
+            </div>
+            
+            <button id="btnDia">Relatório Diário</button>
+            <button id="btnSemana">Relatório Semanal</button>
+            <button id="btnMes">Relatório Mensal</button>
+        </div>
+
+        <div id="relatorioContent">
+            <p class="no-data-message">Nenhum agendamento encontrado para este relatório.</p>
+        </div>
+    </div>
+
+    <script src="relatorios.js"></script>
+</body>
+</html>

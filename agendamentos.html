@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamentos</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .form-group input[type="datetime-local"],
+        .form-group select,
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .form-group select[multiple] {
+            height: auto; /* Para mostrar várias opções */
+        }
+
+        .procedures-container {
+            margin-bottom: 15px;
+        }
+
+        .procedure-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .procedure-group select {
+            width: 60%; /* Diminuindo a largura da seleção do procedimento */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin-right: 10px;
+        }
+
+        .procedure-group input[type="number"] {
+            width: 20%; /* Aumentando um pouco a largura do campo de valor */
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin-left: 5px;
+        }
+
+        .procedure-group input[type="text"] { /* Estilo para o "Especificar outro" */
+            width: 40%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin-left: 5px;
+        }
+
+        .total-value {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .add-client-button {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 5px;
+            margin-left: 5px;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+        }
+
+        .add-client-button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-button {
+            background-color: #dc3545;
+            margin-top: 10px;
+            padding: 10px 20px; /* Consistência com o botão de submit */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #c82333;
+        }
+
+        #addProcedureButton, .remove-procedure-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 5px;
+            margin-left: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        #addProcedureButton:hover, .remove-procedure-button:hover {
+            background-color: #5a6268;
+        }
+
+        #agendamentoMessage {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none; /* Inicia oculto */
+        }
+        #agendamentoMessage.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        #agendamentoMessage.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Novo Agendamento</h2>
+        <form id="agendamentoForm">
+            <div class="form-group">
+                <label for="clienteSelect">Cliente:</label>
+                <select id="clienteSelect" name="clienteSelect" required>
+                    <option value="">Selecione um cliente</option>
+                </select>
+                <a href="clientes.html" class="add-client-button">Adicionar Cliente</a>
+            </div>
+
+            <div class="form-group">
+                <label>Procedimentos:</label>
+                <div id="proceduresContainer">
+                </div>
+                <button type="button" id="addProcedureButton">Adicionar Procedimento</button>
+            </div>
+
+            <div class="form-group">
+                <label for="dataHora">Data e Hora:</label>
+                <input type="datetime-local" id="dataHora" name="dataHora" required>
+            </div>
+
+            <div class="form-group">
+                <label for="observacoes">Observações:</label>
+                <textarea id="observacoes" name="observacoes" rows="4"></textarea>
+            </div>
+
+            <div class="total-value">
+                Valor Total: R$ 0.00
+            </div>
+
+            <button type="submit">Salvar Agendamento</button>
+        </form>
+
+        <div id="agendamentoMessage" class="message"></div>
+
+        <button type="button" class="back-button" onclick="window.location.href='dashboard.html'">Voltar ao Dashboard</button>
+    </div>
+
+    <script>
+        const agendamentoForm = document.getElementById('agendamentoForm');
+        const clienteSelect = document.getElementById('clienteSelect');
+        const proceduresContainer = document.getElementById('proceduresContainer');
+        const addProcedureButton = document.getElementById('addProcedureButton');
+        const totalValueDisplay = document.querySelector('.total-value');
+        const agendamentoMessageDiv = document.getElementById('agendamentoMessage');
+
+        const procedimentosLista = [
+            'Depilação parcial',
+            'Depilação completa',
+            'Extensão de cílios',
+            'Manutenção de cílios',
+            'Design de sobrancelhas',
+            'Outros'
+        ];
+        let contadorProcedimentos = 0;
+
+        function showMessage(message, type) {
+            agendamentoMessageDiv.textContent = message;
+            agendamentoMessageDiv.className = 'message ' + type;
+            agendamentoMessageDiv.style.display = 'block';
+            setTimeout(() => { agendamentoMessageDiv.style.display = 'none'; }, 3000); // Oculta a mensagem após 3 segundos
+        }
+
+        function adicionarProcedimento() {
+            const currentCount = contadorProcedimentos++;
+            const novoProcedimentoDiv = document.createElement('div');
+            novoProcedimentoDiv.classList.add('procedure-group');
+
+            const selectProcedimento = document.createElement('select');
+            selectProcedimento.name = `procedimento_${currentCount}`;
+            selectProcedimento.style.width = '60%';
+            selectProcedimento.setAttribute('data-index', currentCount);
+
+            const optionPadrao = document.createElement('option');
+            optionPadrao.value = '';
+            optionPadrao.textContent = 'Selecione um procedimento';
+            selectProcedimento.appendChild(optionPadrao);
+
+            procedimentosLista.forEach(procedimento => {
+                const option = document.createElement('option');
+                option.value = procedimento;
+                option.textContent = procedimento;
+                selectProcedimento.appendChild(option);
+            });
+
+            const valorInput = document.createElement('input');
+            valorInput.type = 'number';
+            valorInput.name = `valorProcedimento_${currentCount}`;
+            valorInput.classList.add('valor-procedimento');
+            valorInput.placeholder = 'Valor (R$)';
+            valorInput.step = '0.01';
+            valorInput.style.width = '20%';
+
+            const especificarOutroInput = document.createElement('input');
+            especificarOutroInput.type = 'text';
+            especificarOutroInput.name = `especificarOutro_${currentCount}`;
+            especificarOutroInput.placeholder = 'Especificar outro';
+            especificarOutroInput.style.display = 'none';
+
+            const removerButton = document.createElement('button');
+            removerButton.type = 'button';
+            removerButton.classList.add('remove-procedure-button');
+            removerButton.textContent = 'Remover';
+            removerButton.addEventListener('click', () => {
+                novoProcedimentoDiv.remove();
+                calcularValorTotal();
+            });
+
+            selectProcedimento.addEventListener('change', () => {
+                if (selectProcedimento.value === 'Outros') {
+                    especificarOutroInput.style.display = 'inline-block';
+                    especificarOutroInput.setAttribute('required', 'true');
+                } else {
+                    especificarOutroInput.style.display = 'none';
+                    especificarOutroInput.removeAttribute('required');
+                    especificarOutroInput.value = '';
+                }
+                calcularValorTotal();
+            });
+
+            valorInput.addEventListener('input', calcularValorTotal);
+            especificarOutroInput.addEventListener('input', calcularValorTotal);
+
+            novoProcedimentoDiv.appendChild(selectProcedimento);
+            novoProcedimentoDiv.appendChild(valorInput);
+            novoProcedimentoDiv.appendChild(especificarOutroInput);
+            // Adiciona o botão de remover apenas se já houver procedimentos (ou seja, não é o primeiro)
+            if (proceduresContainer.children.length > 0) {
+                novoProcedimentoDiv.appendChild(removerButton);
+            }
+            proceduresContainer.appendChild(novoProcedimentoDiv);
+            calcularValorTotal();
+        }
+
+        async function loadClientes() {
+            try {
+                const response = await fetch('http://localhost:3001/api/clients');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const clientes = await response.json();
+                clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+                clientes.forEach(cliente => {
+                    const option = document.createElement('option');
+                    option.value = cliente._id;
+                    option.textContent = cliente.name;
+                    clienteSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Ocorreu um erro ao carregar os clientes:', error);
+                showMessage('Ocorreu um erro ao carregar os clientes. Verifique o console para mais detalhes.', 'error');
+            }
+        }
+
+        function calcularValorTotal() {
+            let total = 0;
+            const procedimentosGrupos = proceduresContainer.querySelectorAll('.procedure-group');
+
+            procedimentosGrupos.forEach(grupo => {
+                const selectProcedimento = grupo.querySelector('select');
+                const valorInput = grupo.querySelector('.valor-procedimento');
+                const especificarOutroInput = grupo.querySelector('[name^="especificarOutro_"]');
+
+                const procedimentoNome = selectProcedimento.value;
+                const valor = parseFloat(valorInput.value) || 0;
+
+                if (procedimentoNome === 'Outros' && !especificarOutroInput.value.trim()) {
+                    return;
+                }
+                if (procedimentoNome) {
+                    total += valor;
+                }
+            });
+            totalValueDisplay.textContent = `Valor Total: R$ ${total.toFixed(2)}`;
+        }
+
+        addProcedureButton.addEventListener('click', adicionarProcedimento);
+
+        agendamentoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            agendamentoMessageDiv.style.display = 'none';
+
+            const clientId = clienteSelect.value;
+            const dataHoraValue = document.getElementById('dataHora').value;
+            const [data, hora] = dataHoraValue.split('T');
+
+            // O status é agora fixo como "pendente"
+            const status = "pendente"; // <--- ALTERAÇÃO PRINCIPAL AQUI
+
+            const observacoes = document.getElementById('observacoes').value;
+            const procedimentosAgendados = [];
+            const procedimentosGrupos = proceduresContainer.querySelectorAll('.procedure-group');
+
+            let hasValidProcedure = false;
+
+            procedimentosGrupos.forEach(grupo => {
+                const selectProcedimento = grupo.querySelector('select');
+                const valorInput = grupo.querySelector('.valor-procedimento');
+                const especificarOutroInput = grupo.querySelector('[name^="especificarOutro_"]');
+
+                const procedimentoNome = selectProcedimento.value;
+                const valor = parseFloat(valorInput.value) || 0;
+                let nomeExibicao = procedimentoNome;
+
+                if (procedimentoNome === 'Outros') {
+                    const especificacao = especificarOutroInput.value.trim();
+                    if (especificacao) {
+                        nomeExibicao = `Outros: ${especificacao}`;
+                    } else {
+                        return;
+                    }
+                } else if (!procedimentoNome) {
+                    return;
+                }
+
+                if (nomeExibicao && valor >= 0) {
+                    procedimentosAgendados.push({ nome: nomeExibicao, valor: valor });
+                    hasValidProcedure = true;
+                }
+            });
+
+            if (!clientId) {
+                showMessage('Por favor, selecione um cliente.', 'error');
+                return;
+            }
+
+            if (!data || !hora) {
+                showMessage('Por favor, selecione a data e a hora do agendamento.', 'error');
+                return;
+            }
+
+            if (!hasValidProcedure) {
+                showMessage('Por favor, selecione e preencha pelo menos um procedimento com um valor válido.', 'error');
+                return;
+            }
+
+            const novoAgendamento = {
+                clientId: clientId,
+                date: data,
+                time: hora,
+                status: status, // Enviando sempre "pendente"
+                observacoes: observacoes,
+                procedimentos: procedimentosAgendados,
+                valorTotal: parseFloat(totalValueDisplay.textContent.split('R$ ')[1])
+            };
+
+            try {
+                const response = await fetch('http://localhost:3001/api/agendamentos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(novoAgendamento),
+                });
+
+                if (response.ok) {
+                    showMessage('Agendamento salvo com sucesso!', 'success');
+                    agendamentoForm.reset();
+                    proceduresContainer.innerHTML = '';
+                    contadorProcedimentos = 0;
+                    adicionarProcedimento();
+                    calcularValorTotal();
+                    loadClientes();
+                } else {
+                    const errorData = await response.json();
+                    showMessage(`Erro ao salvar agendamento: ${errorData.message || 'Erro desconhecido'}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Erro ao salvar agendamento:', error);
+                showMessage('Erro ao salvar agendamento: Falha na comunicação com o servidor. Verifique se o backend está rodando.', 'error');
+            }
+        });
+
+        // Inicializações: Adiciona o primeiro procedimento e carrega clientes
+        adicionarProcedimento();
+        loadClientes();
+    </script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livro Caixa - Transações</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .summary-box {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .summary-item {
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .summary-item.receitas {
+            color: #28a745; /* Verde para receitas */
+        }
+
+        .summary-item.despesas {
+            color: #dc3545; /* Vermelho para despesas */
+        }
+
+        .summary-item.saldo {
+            color: #007bff; /* Azul para saldo */
+        }
+
+        .form-section {
+            margin-top: 25px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="date"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-right: 10px; /* Espaço entre botões */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .actions-cell {
+            white-space: nowrap; /* Evita que os botões quebrem a linha */
+        }
+
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            display: inline-block; /* Para o link se comportar como botão */
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Livro Caixa - Transações</h2>
+
+        <div id="message" class="message-success"></div>
+
+        <div class="summary-box">
+            <div class="summary-item receitas">
+                Receitas Totais: <span id="totalReceitas">R$ 0.00</span>
+            </div>
+            <div class="summary-item despesas">
+                Despesas Totais: <span id="totalDespesas">R$ 0.00</span>
+            </div>
+            <div class="summary-item saldo">
+                Saldo Atual: <span id="saldoAtual">R$ 0.00</span>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Adicionar Nova Transação</h3>
+            <form id="transactionForm">
+                <div class="form-group">
+                    <label for="tipo">Tipo:</label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="descricao">Descrição:</label>
+                    <input type="text" id="descricao" name="descricao" required placeholder="Ex: Material de limpeza, Serviço de corte de cabelo">
+                </div>
+                <div class="form-group">
+                    <label for="valor">Valor:</label>
+                    <input type="number" id="valor" name="valor" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="data">Data:</label>
+                    <input type="date" id="data" name="data" required>
+                </div>
+                <button type="submit">Adicionar Transação</button>
+            </form>
+        </div>
+
+        <h3>Histórico de Transações</h3>
+        <table id="transactionsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+
+        <a href="dashboard.html" class="back-button">Voltar ao Dashboard</a>
+    </div>
+
+    <script>
+        const transactionForm = document.getElementById('transactionForm');
+        const transactionsTableBody = document.getElementById('transactionsTable').getElementsByTagName('tbody')[0];
+        const totalReceitasSpan = document.getElementById('totalReceitas');
+        const totalDespesasSpan = document.getElementById('totalDespesas');
+        const saldoAtualSpan = document.getElementById('saldoAtual');
+        const messageDiv = document.getElementById('message');
+
+        // Função para exibir mensagens
+        function showMessage(msg, type) {
+            messageDiv.textContent = msg;
+            messageDiv.className = ''; // Limpa classes existentes
+            messageDiv.classList.add(type === 'success' ? 'message-success' : 'message-error');
+            messageDiv.style.display = 'block';
+            setTimeout(() => { messageDiv.style.display = 'none'; }, 3000); // Esconde a mensagem após 3 segundos
+        }
+
+        // Função para carregar e exibir as transações
+        async function loadTransactions() {
+            try {
+                const response = await fetch('http://localhost:3001/api/transacoes');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const transacoes = await response.json();
+                transactionsTableBody.innerHTML = ''; // Limpa a tabela
+
+                let totalReceitas = 0;
+                let totalDespesas = 0;
+
+                transacoes.forEach(transacao => {
+                    const row = transactionsTableBody.insertRow();
+                    row.insertCell().textContent = transacao._id;
+                    row.insertCell().textContent = transacao.tipo.charAt(0).toUpperCase() + transacao.tipo.slice(1); // Capitaliza o tipo
+                    row.insertCell().textContent = transacao.descricao;
+                    row.insertCell().textContent = `R$ ${parseFloat(transacao.valor).toFixed(2)}`;
+                    row.insertCell().textContent = transacao.data; // A data já vem formatada do backend
+
+                    const actionsCell = row.insertCell();
+                    actionsCell.classList.add('actions-cell');
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Excluir';
+                    deleteBtn.classList.add('delete-button');
+                    deleteBtn.onclick = () => deleteTransaction(transacao._id);
+                    actionsCell.appendChild(deleteBtn);
+
+                    if (transacao.tipo === 'receita') {
+                        totalReceitas += parseFloat(transacao.valor);
+                    } else if (transacao.tipo === 'despesa') {
+                        totalDespesas += parseFloat(transacao.valor);
+                    }
+                });
+
+                // Atualiza os resumos
+                totalReceitasSpan.textContent = `R$ ${totalReceitas.toFixed(2)}`;
+                totalDespesasSpan.textContent = `R$ ${totalDespesas.toFixed(2)}`;
+                saldoAtualSpan.textContent = `R$ ${(totalReceitas - totalDespesas).toFixed(2)}`;
+
+            } catch (error) {
+                console.error('Erro ao carregar transações:', error);
+                showMessage('Erro ao carregar a lista de transações.', 'error');
+            }
+        }
+
+        // Função para adicionar uma nova transação
+        transactionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const tipo = document.getElementById('tipo').value;
+            const descricao = document.getElementById('descricao').value;
+            const valor = parseFloat(document.getElementById('valor').value);
+            const data = document.getElementById('data').value; // Formato YYYY-MM-DD
+
+            if (isNaN(valor) || valor <= 0) {
+                showMessage('Por favor, insira um valor válido e positivo.', 'error');
+                return;
+            }
+
+            const novaTransacao = {
+                tipo,
+                descricao,
+                valor,
+                data
+            };
+
+            try {
+                const response = await fetch('http://localhost:3001/api/transacoes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(novaTransacao),
+                });
+
+                const dataResponse = await response.json(); // Sempre tente ler o JSON
+
+                if (response.ok) {
+                    showMessage('Transação adicionada com sucesso!', 'success');
+                    transactionForm.reset();
+                    loadTransactions(); // Recarrega a lista e os totais
+                } else {
+                    showMessage(dataResponse.message || 'Erro ao adicionar transação.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar transação:', error);
+                showMessage('Erro de conexão ou servidor ao adicionar transação.', 'error');
+            }
+        });
+
+        // Função para deletar uma transação
+        async function deleteTransaction(id) {
+            if (!confirm('Tem certeza que deseja excluir esta transação?')) {
+                return;
+            }
+            try {
+                const response = await fetch(`http://localhost:3001/api/transacoes/${id}`, {
+                    method: 'DELETE',
+                });
+                const dataResponse = await response.json();
+
+                if (response.ok) {
+                    showMessage('Transação excluída com sucesso!', 'success');
+                    loadTransactions(); // Recarrega a lista e os totais
+                } else {
+                    showMessage(dataResponse.message || 'Erro ao excluir transação.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao excluir transação:', error);
+                showMessage('Erro de conexão ou servidor ao excluir transação.', 'error');
+            }
+        }
+
+        // Carrega as transações ao carregar a página
+        loadTransactions();
+
+        // Define a data atual como padrão no campo de data (opcional, mas útil)
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Janeiro é 0
+            const year = today.getFullYear();
+            document.getElementById('data').value = `<span class="math-inline">\{year\}\-</span>{month}-${day}`;
+        });
+    </script>
+</body>
+</html>

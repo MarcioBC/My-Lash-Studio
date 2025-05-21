@@ -1,0 +1,18 @@
+[
+  
+  {
+    "_id": "proc4",
+    "nome": "Depilação completa",
+    "valor": 120.00
+  },
+  {
+    "_id": "proc5",
+    "nome": "Depilação parcial",
+    "valor": 30.00
+  },
+  {
+    "_id": "proc6",
+    "nome": "Manutenção de cílios",
+    "valor": 60.00
+  }
+]

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Agendamentos</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .module-button {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .edit-button {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .confirm-button {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .edit-button:hover {
+            background-color: #e0a800;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .confirm-button:hover {
+            background-color: #218838;
+        }
+
+        .back-button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        #message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Lista de Agendamentos</h2>
+        <div id="message"></div>
+        <table id="agendamentosTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Data e Hora</th>
+                    <th>Procedimentos</th>
+                    <th>Valor Total</th>
+                    <th>Status</th>
+                    <th>Observações</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="agendamentosBody">
+            </tbody>
+        </table>
+        <div class="back-button-container">
+            <a href="dashboard.html" class="back-button">Voltar ao Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        const agendamentosTableBody = document.getElementById('agendamentosTable').getElementsByTagName('tbody')[0];
+        const messageDiv = document.getElementById('message');
+
+        function showMessage(msg, type) {
+            messageDiv.textContent = msg;
+            messageDiv.className = '';
+            messageDiv.classList.add(type === 'success' ? 'message-success' : 'message-error');
+            messageDiv.style.display = 'block';
+            setTimeout(() => { messageDiv.style.display = 'none'; }, 3000);
+        }
+
+        async function loadAgendamentos() {
+            try {
+                // Modificado para chamar a rota principal /api/appointments
+                // que já retorna os dados populados e formatados
+                const agendamentosResponse = await fetch('http://localhost:3001/api/agendamentos');
+                if (!agendamentosResponse.ok) {
+                    throw new Error(`HTTP error! status: ${agendamentosResponse.status}`);
+                }
+                // O backend já deve retornar os dados com clienteNome, procedimentosNomes, data e hora formatados
+                const agendamentos = await agendamentosResponse.json();
+
+                agendamentosTableBody.innerHTML = ''; // Limpa a tabela antes de preencher
+
+                if (agendamentos.length === 0) {
+                    agendamentosTableBody.innerHTML = '<tr><td colspan="8">Nenhum agendamento encontrado.</td></tr>';
+                    return;
+                }
+
+                agendamentos.forEach(agendamento => {
+                    const row = agendamentosTableBody.insertRow();
+
+                    // Coluna 1: ID
+                    row.insertCell().textContent = agendamento._id;
+
+                    // Coluna 2: Cliente (Nome) - Agora vem diretamente do backend
+                    row.insertCell().textContent = agendamento.clienteNome || 'Cliente Desconhecido';
+
+                    // Coluna 3: Data e Hora - Agora vem diretamente do backend e já formatada
+                    const dataHoraCell = row.insertCell();
+                    dataHoraCell.textContent = `${agendamento.data || 'N/A'} às ${agendamento.hora || 'N/A'}`;
+
+
+                    // Coluna 4: Procedimentos (Nomes) - Agora vem diretamente do backend
+                    row.insertCell().textContent = agendamento.procedimentosNomes || 'N/A';
+
+                    // Coluna 5: Valor Total
+                    // O backend já deve ter calculado o valor total
+                    row.insertCell().textContent = `R$ ${parseFloat(agendamento.valorTotal || 0).toFixed(2).replace('.', ',')}`;
+
+                    // Coluna 6: Status
+                    row.insertCell().textContent = agendamento.status ? (agendamento.status.charAt(0).toUpperCase() + agendamento.status.slice(1)) : 'N/A';
+
+                    // Coluna 7: Observações
+                    row.insertCell().textContent = agendamento.observacoes || 'N/A';
+
+                    // Coluna 8: Ações (Botões)
+                    const actionsCell = row.insertCell();
+                    actionsCell.classList.add('actions');
+
+                    // Botão de Editar
+                    const editButton = document.createElement('a');
+                    editButton.href = `agendamentos_editar.html?id=${agendamento._id}`;
+                    editButton.textContent = 'Editar';
+                    editButton.classList.add('module-button', 'edit-button');
+                    actionsCell.appendChild(editButton);
+
+                    // Botão de Excluir
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Excluir';
+                    deleteButton.classList.add('module-button', 'delete-button');
+                    deleteButton.onclick = () => deleteAgendamento(agendamento._id);
+                    actionsCell.appendChild(deleteButton);
+
+                    // Botão de Confirmar (visível apenas se o status for "pendente")
+                    if (agendamento.status && agendamento.status.toLowerCase() === 'pendente') {
+                        const confirmBtn = document.createElement('button');
+                        confirmBtn.textContent = 'Confirmar';
+                        confirmBtn.classList.add('module-button', 'confirm-button');
+                        confirmBtn.onclick = () => confirmAgendamento(agendamento._id);
+                        actionsCell.appendChild(confirmBtn);
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao carregar agendamentos:', error);
+                showMessage('Erro ao carregar a lista de agendamentos. Verifique o console para mais detalhes.', 'error');
+                agendamentosTableBody.innerHTML = '<tr><td colspan="8">Erro ao carregar agendamentos.</td></tr>';
+            }
+        }
+
+        async function deleteAgendamento(id) {
+            if (confirm("Tem certeza que deseja excluir este agendamento?")) {
+                try {
+                    const response = await fetch(`http://localhost:3001/api/agendamentos/${id}`, { // Corrigido para /api/appointments
+                        method: 'DELETE',
+                    });
+                    // Para DELETE, o status 204 (No Content) é comum e não retorna JSON
+                    if (response.status === 204) {
+                        showMessage('Agendamento excluído com sucesso!', 'success');
+                        loadAgendamentos();
+                    } else {
+                        const data = await response.json(); // Tenta ler JSON para mensagens de erro
+                        showMessage(data.message || 'Erro desconhecido ao excluir agendamento.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Erro ao excluir agendamento:', error);
+                    showMessage('Erro de conexão ou servidor ao excluir agendamento.', 'error');
+                }
+            }
+        }
+
+        async function confirmAgendamento(id) {
+            if (!confirm('Tem certeza que deseja CONFIRMAR este agendamento? Ele será registrado como receita.')) {
+                return;
+            }
+            try {
+                const response = await fetch(`http://localhost:3001/api/agendamentos/${id}/confirmar`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showMessage(data.message, 'success');
+                    loadAgendamentos();
+                } else {
+                    showMessage(data.message || 'Erro ao confirmar agendamento.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao confirmar agendamento:', error);
+                showMessage('Erro de conexão ou servidor ao atualizar agendamento.', 'error');
+            }
+        }
+
+        // Carrega os agendamentos quando a página é carregada
+        loadAgendamentos();
+    </script>
+</body>
+</html>

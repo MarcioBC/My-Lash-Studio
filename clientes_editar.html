@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Cliente</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px; /* Tamanho médio para formulário */
+            margin: 30px auto;
+            text-align: center; /* Centraliza o título */
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left; /* Alinha labels e inputs à esquerda */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
+            width: calc(100% - 22px); /* 100% menos padding e borda */
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            background-color: #2471a3;
+            transform: translateY(0);
+        }
+
+        .back-button-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            display: inline-block; /* Para alinhar com a margem */
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Editar Cliente</h2>
+        <form id="editClientForm">
+            <div class="form-group">
+                <label for="clientId">ID do Cliente:</label>
+                <input type="text" id="clientId" readonly> </div>
+            <div class="form-group">
+                <label for="clientName">Nome:</label>
+                <input type="text" id="clientName" required>
+            </div>
+            <div class="form-group">
+                <label for="clientPhone">Telefone:</label>
+                <input type="tel" id="clientPhone" required>
+            </div>
+            <div class="form-group">
+                <label for="clientEmail">Email:</label>
+                <input type="email" id="clientEmail">
+            </div>
+            <button type="submit">Salvar Alterações</button>
+        </form>
+        <div class="back-button-container">
+            <a href="consultar_clientes.html" class="back-button">Voltar para a Lista</a>
+        </div>
+    </div>
+
+    <script>
+        const clientIdInput = document.getElementById('clientId');
+        const clientNameInput = document.getElementById('clientName');
+        const clientPhoneInput = document.getElementById('clientPhone');
+        const clientEmailInput = document.getElementById('clientEmail');
+        const editClientForm = document.getElementById('editClientForm');
+
+        let currentClientId = null; // Variável para armazenar o ID do cliente sendo editado
+
+        // Função para carregar os dados do cliente
+        async function loadClientData(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/clients/${id}`);
+                if (!response.ok) {
+                    throw new Error(`Erro ao carregar cliente: ${response.status}`);
+                }
+                const client = await response.json();
+                
+                // Preenche o formulário com os dados do cliente
+                clientIdInput.value = client._id;
+                clientNameInput.value = client.name;
+                clientPhoneInput.value = client.phone;
+                clientEmailInput.value = client.email || ''; // Garante que não apareça 'null'
+                
+                currentClientId = client._id; // Salva o ID para usar na atualização
+
+            } catch (error) {
+                console.error('Erro ao carregar dados do cliente:', error);
+                alert('Erro ao carregar os dados do cliente para edição.');
+                // Opcional: Redirecionar de volta para a lista de clientes em caso de erro
+                // window.location.href = 'consultar_clientes.html';
+            }
+        }
+
+        // Função para lidar com o envio do formulário (atualização)
+        editClientForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Impede o envio padrão do formulário
+
+            if (!currentClientId) {
+                alert('Erro: ID do cliente não encontrado para atualização.');
+                return;
+            }
+
+            const updatedClient = {
+                name: clientNameInput.value,
+                phone: clientPhoneInput.value,
+                email: clientEmailInput.value
+            };
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/clients/${currentClientId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedClient),
+                });
+
+                if (response.ok) {
+                    alert('Cliente atualizado com sucesso!');
+                    // Opcional: Redirecionar de volta para a lista de clientes
+                    window.location.href = 'consultar_clientes.html'; 
+                } else {
+                    const errorData = await response.json();
+                    alert(`Erro ao atualizar cliente: ${errorData.message || 'Erro desconhecido'}`);
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar cliente:', error);
+                alert('Erro de conexão ao tentar atualizar o cliente.');
+            }
+        });
+
+        // Quando a página é carregada, extrai o ID da URL e carrega os dados
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id'); // Pega o 'id' da URL (ex: ?id=123)
+
+            if (id) {
+                loadClientData(id);
+            } else {
+                alert('ID do cliente não fornecido na URL.');
+                // Opcional: Redirecionar para a lista de clientes se não houver ID
+                window.location.href = 'consultar_clientes.html';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Agendamento</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="date"], input[type="time"], select, textarea {
+            width: calc(100% - 22px); /* Ajusta para o padding e border */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* Garante que padding e border não aumentem a largura */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+        #message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Editar Agendamento</h2>
+        <div id="message"></div>
+        <form id="editAgendamentoForm">
+            <input type="hidden" id="agendamentoId" name="id">
+
+            <label for="clienteSelect">Cliente:</label>
+            <select id="clienteSelect" name="clienteId" required>
+                </select>
+
+            <label for="date">Data:</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="time">Hora:</label>
+            <input type="time" id="time" name="time" required>
+
+            <label for="procedimentosSelect">Procedimentos:</label>
+            <select id="procedimentosSelect" name="procedimentos" multiple required>
+                </select>
+
+            <label for="valorTotal">Valor Total:</label>
+            <input type="text" id="valorTotal" name="valorTotal" readonly>
+
+            <label for="status">Status:</label>
+            <select id="status" name="status">
+                <option value="pendente">Pendente</option>
+                <option value="confirmado">Confirmado</option>
+                <option value="cancelado">Cancelado</option>
+                <option value="concluido">Concluído</option>
+            </select>
+
+            <label for="observacoes">Observações:</label>
+            <textarea id="observacoes" name="observacoes" rows="3"></textarea>
+
+            <button type="submit">Salvar Edições</button>
+            <a href="agendamentos_lista.html" class="back-button">Voltar</a>
+        </form>
+    </div>
+
+    <script>
+    const agendamentoIdField = document.getElementById('agendamentoId');
+    const clienteSelect = document.getElementById('clienteSelect');
+    const procedimentosSelect = document.getElementById('procedimentosSelect');
+    const valorTotalInput = document.getElementById('valorTotal');
+    const dateInput = document.getElementById('date'); // Adicionado
+    const timeInput = document.getElementById('time'); // Adicionado
+    const statusSelect = document.getElementById('status'); // Adicionado
+    const observacoesTextarea = document.getElementById('observacoes'); // Adicionado
+
+    const editAgendamentoForm = document.getElementById('editAgendamentoForm');
+    const messageDiv = document.getElementById('message');
+
+    function showMessage(msg, type) {
+        messageDiv.textContent = msg;
+        messageDiv.className = '';
+        messageDiv.classList.add(type === 'success' ? 'message-success' : 'message-error');
+        messageDiv.style.display = 'block';
+        setTimeout(() => { messageDiv.style.display = 'none'; }, 3000);
+    }
+
+    // Função para carregar clientes
+    async function loadClients() {
+        try {
+            const response = await fetch('http://localhost:3001/api/clients');
+            if (!response.ok) throw new Error('Failed to load clients');
+            const clients = await response.json();
+            clienteSelect.innerHTML = '<option value="">Selecione um Cliente</option>';
+            clients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client._id;
+                option.textContent = client.name;
+                clienteSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Erro ao carregar clientes:', error);
+            showMessage('Erro ao carregar lista de clientes.', 'error');
+        }
+    }
+
+    // Função para carregar procedimentos
+    async function loadProcedimentos() {
+        try {
+            const response = await fetch('http://localhost:3001/api/procedures');
+            if (!response.ok) throw new Error('Failed to load procedures');
+            const procedimentos = await response.json();
+            procedimentosSelect.innerHTML = '';
+            procedimentos.forEach(proc => {
+                const option = document.createElement('option');
+                option.value = proc._id;
+                option.textContent = proc.nome;
+                option.dataset.valor = proc.valor;
+                procedimentosSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Erro ao carregar procedimentos:', error);
+            showMessage('Erro ao carregar lista de procedimentos.', 'error');
+        }
+    }
+
+    // Função para calcular o valor total dos procedimentos selecionados
+    function calculateTotalValue() {
+        let total = 0;
+        Array.from(procedimentosSelect.selectedOptions).forEach(option => {
+            total += parseFloat(option.dataset.valor || 0);
+        });
+        valorTotalInput.value = total.toFixed(2).replace('.', ',');
+    }
+
+    // Event listener para mudanças nos procedimentos
+    procedimentosSelect.addEventListener('change', calculateTotalValue);
+
+
+    // Função para carregar os dados do agendamento para edição
+    async function loadAgendamentoForEdit(id) {
+        try {
+            const response = await fetch(`http://localhost:3001/api/agendamentos/${id}`);
+            if (!response.ok) throw new Error('Failed to load agendamento');
+            const agendamento = await response.json();
+
+            agendamentoIdField.value = agendamento._id;
+            dateInput.value = agendamento.date;
+            timeInput.value = agendamento.time;
+            statusSelect.value = agendamento.status;
+            observacoesTextarea.value = agendamento.observacoes || '';
+
+            // --- CORREÇÃO: CARREGAR CLIENTE CORRETO ---
+            // Verifica se o clienteSelect já foi populado e tenta selecionar
+            if (clienteSelect.options.length > 1) { // Verifica se há opções além do placeholder
+                 clienteSelect.value = agendamento.clientId;
+            } else {
+                // Se ainda não populou, pode haver um pequeno problema de timing.
+                // Mas como loadClients é `await` antes, isso não deve acontecer.
+                // Log para debug, se necessário:
+                console.warn("Cliente select ainda não populado ao tentar selecionar o cliente do agendamento.");
+            }
+
+
+            // --- CORREÇÃO: CARREGAR VALOR TOTAL ---
+            // Define o valor total inicial do agendamento ANTES de (re)calcular pelos procedimentos
+            valorTotalInput.value = parseFloat(agendamento.valorTotal || 0).toFixed(2).replace('.', ',');
+
+
+            // --- CORREÇÃO: SELECIONAR PROCEDIMENTOS ---
+            if (agendamento.procedimentos && agendamento.procedimentos.length > 0) {
+                console.log("Procedimentos do agendamento:", agendamento.procedimentos); // Debug: Veja o que veio do agendamento
+
+                Array.from(procedimentosSelect.options).forEach(option => {
+                    // MUDANÇA: Agora compara pelo _id do procedimento, que é mais robusto
+                    // Assegura que o _id esteja presente nos dados do agendamento
+                    const isSelected = agendamento.procedimentos.some(p => p._id === option.value);
+                    option.selected = isSelected;
+                    console.log(`Opção "${option.textContent}" (ID: ${option.value}) selecionada: ${isSelected}`); // Debug: Qual opção está sendo selecionada
+                });
+                // Recalcular o valor total após selecionar os procedimentos (opcional, pois já carregamos o valor inicial)
+                // calculateTotalValue(); 
+            } else {
+                console.log("Nenhum procedimento encontrado no agendamento para pré-selecionar.");
+            }
+
+        } catch (error) {
+            console.error('Erro ao carregar agendamento para edição:', error);
+            showMessage('Erro ao carregar detalhes do agendamento.', 'error');
+        }
+    }
+
+    // Lidar com o envio do formulário de edição
+    editAgendamentoForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const id = agendamentoIdField.value;
+        const formData = new FormData(editAgendamentoForm);
+        const agendamentoData = {};
+
+        // Extrai campos simples
+        agendamentoData.clientId = formData.get('clienteId');
+        agendamentoData.date = formData.get('date');
+        agendamentoData.time = formData.get('time');
+        agendamentoData.status = formData.get('status');
+        agendamentoData.observacoes = formData.get('observacoes');
+        
+        // Trata procedimentos
+        const selectedOptions = Array.from(procedimentosSelect.selectedOptions);
+        agendamentoData.procedimentos = selectedOptions.map(option => ({
+            _id: option.value, // Assumindo que option.value é o _id do procedimento
+            nome: option.textContent,
+            valor: parseFloat(option.dataset.valor)
+        }));
+
+        // Trata valorTotal
+        agendamentoData.valorTotal = parseFloat(valorTotalInput.value.replace(',', '.'));
+
+
+        try {
+            const response = await fetch(`http://localhost:3001/api/agendamentos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(agendamentoData)
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                showMessage('Agendamento atualizado com sucesso!', 'success');
+                // Redireciona de volta para a lista após a edição
+                setTimeout(() => {
+                    window.location.href = 'agendamentos_lista.html';
+                }, 1500);
+            } else {
+                showMessage(data.message || 'Erro ao atualizar agendamento.', 'error');
+            }
+        } catch (error) {
+            console.error('Erro ao enviar dados de edição:', error);
+            showMessage('Erro de conexão ou servidor ao atualizar agendamento.', 'error');
+        }
+    });
+
+    // Inicialização: carrega clientes, procedimentos e os dados do agendamento
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        if (id) {
+            await loadClients(); // Garante que os clientes estejam carregados
+            await loadProcedimentos(); // Garante que os procedimentos estejam carregados
+            await loadAgendamentoForEdit(id); // Agora carrega o agendamento e preenche o formulário
+        } else {
+            showMessage('ID do agendamento não fornecido.', 'error');
+        }
+    });
+</script>
+</body>
+</html>

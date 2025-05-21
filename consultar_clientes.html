@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Clientes</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif; /* Fonte mais profissional */
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6; /* Fundo suave */
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 900px; /* Aumentado para melhor visualização */
+            margin: 30px auto; /* Centraliza e adiciona margem */
+        }
+
+        h2 {
+            color: #2c3e50; /* Cor de título harmoniosa */
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra para tabela */
+        }
+
+        th, td {
+            border: 1px solid #e0e0e0; /* Bordas mais suaves */
+            padding: 12px 15px; /* Mais padding */
+            text-align: left;
+        }
+
+        th {
+            background-color: #eef4f7; /* Fundo para o cabeçalho */
+            color: #444;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* Linhas zebradas */
+        }
+        
+        tr:hover {
+            background-color: #f1f1f1; /* Efeito hover nas linhas */
+        }
+
+
+        .actions {
+            display: flex;
+            gap: 8px; /* Espaçamento menor entre os botões de ação */
+            justify-content: center;
+            flex-wrap: wrap; /* Para responsividade */
+        }
+
+        .edit-button, .delete-button {
+            background-color: #3498db; /* Azul primário para Editar */
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px; /* Bordas mais arredondadas */
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.85em; /* Fonte ligeiramente menor */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-button {
+            background-color: #2ecc71; /* Verde para Editar (mais intuitivo) */
+        }
+
+        .delete-button {
+            background-color: #e74c3c; /* Vermelho para Excluir */
+        }
+
+        .edit-button:hover {
+            background-color: #27ae60;
+            transform: translateY(-1px);
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+            transform: translateY(-1px);
+        }
+        
+        .edit-button:active, .delete-button:active {
+            transform: translateY(0);
+        }
+
+
+        .back-button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 12px 25px; /* Mais padding para o botão voltar */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+            transform: translateY(-1px);
+        }
+        
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 20px auto;
+            }
+            h2 {
+                font-size: 1.8em;
+            }
+            th, td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            .actions {
+                flex-direction: column; /* Empilha os botões de ação */
+                gap: 5px;
+            }
+            .edit-button, .delete-button {
+                width: 100%; /* Ocupa a largura total */
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            th, td {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Lista de Clientes</h2>
+        <table id="clientesTable">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Email</th> <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+        <div class="back-button-container">
+            <a href="dashboard.html" class="back-button">Voltar ao Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        const clientesTableBody = document.getElementById('clientesTable').getElementsByTagName('tbody')[0];
+
+        async function loadClientes() {
+            try {
+                const response = await fetch('http://localhost:3001/api/clients'); 
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const clientes = await response.json();
+
+                // LIMPA A TABELA ANTES DE ADICIONAR NOVOS CLIENTES
+                clientesTableBody.innerHTML = ''; 
+
+                clientes.forEach(cliente => {
+                    const row = clientesTableBody.insertRow();
+                    // Removido: const idCell = row.insertCell();
+                    const nomeCell = row.insertCell();
+                    const telefoneCell = row.insertCell();
+                    const emailCell = row.insertCell();
+                    const actionsCell = row.insertCell();
+                    actionsCell.classList.add('actions');
+
+                    // Removido: idCell.textContent = cliente._id;
+                    nomeCell.textContent = cliente.name;
+                    telefoneCell.textContent = cliente.phone;
+                    emailCell.textContent = cliente.email || 'N/A'; // Adicione um fallback caso email não exista no cliente
+
+                    // Botão EDITAR
+                    const editButton = document.createElement('a');
+                    editButton.href = `clientes_editar.html?id=${cliente._id}`; 
+                    editButton.textContent = 'Editar';
+                    editButton.classList.add('edit-button');
+                    actionsCell.appendChild(editButton);
+
+                    // Botão EXCLUIR
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Excluir';
+                    deleteButton.classList.add('delete-button');
+                    deleteButton.onclick = () => deleteCliente(cliente._id);
+                    actionsCell.appendChild(deleteButton);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+                alert('Erro ao carregar a lista de clientes.');
+            }
+        }
+
+        async function deleteCliente(id) {
+            if (confirm("Tem certeza que deseja excluir este cliente?")) {
+                try {
+                    const response = await fetch(`http://localhost:3001/api/clients/${id}`, {
+                        method: 'DELETE',
+                    });
+                    if (response.ok) {
+                        alert('Cliente excluído com sucesso!');
+                        loadClientes(); // Recarrega a lista para refletir a exclusão
+                    } else {
+                        const errorData = await response.json();
+                        alert(`Erro ao excluir cliente: ${errorData.message || 'Erro desconhecido'}`);
+                    }
+                } catch (error) {
+                    console.error('Erro ao excluir cliente:', error);
+                    alert('Erro ao excluir o cliente.');
+                }
+            }
+        }
+
+        // Carrega os clientes quando a página é carregada
+        document.addEventListener('DOMContentLoaded', loadClientes);
+    </script>
+</body>
+</html>
