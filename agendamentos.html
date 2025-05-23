@@ -4,26 +4,188 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamentos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Seus estilos CSS permanecem inalterados */
         body {
-            font-family: sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6; /* Cor de fundo do dashboard */
             color: #333;
+            line-height: 1.6;
+            min-height: 100vh; /* Garante que o corpo ocupe toda a altura da viewport */
+            display: flex;
+            flex-direction: column; /* Para que o header fique no topo e o conteúdo abaixo */
         }
 
+        /* Estilos para o cabeçalho (onde o menu ficará) - COPIADO DO DASHBOARD.HTML */
+        header {
+            background-color: #2c3e50; /* Cor de fundo escura para o cabeçalho */
+            color: white;
+            padding: 15px 30px; /* Ajustado para 30px nas laterais para melhor espaçamento */
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Sombra mais suave */
+            display: flex;
+            justify-content: space-between; /* Espaço entre o título e o menu */
+            align-items: center; /* Alinha verticalmente */
+            flex-wrap: wrap; /* Permite quebra de linha em telas menores */
+            position: sticky; /* Menu fixo no topo ao rolar */
+            top: 0;
+            z-index: 1000; /* Garante que fique acima de outros elementos */
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 26px; /* Ajustado para um tamanho consistente */
+            font-weight: 600;
+            color: #ffbbcd;
+        }
+
+        /* Estilos para a navegação (o menu em si) - COPIADO DO DASHBOARD.HTML */
+        /* Estilos para a navegação (o menu em si) */
+        nav {
+            flex-grow: 1; /* Permite que a navegação ocupe espaço para empurrar os itens à direita */
+            text-align: right; /* Alinha o texto do nav para a direita */
+            margin-left: 20px; /* Espaço entre o título e o menu */
+        }
+
+        nav ul {
+            list-style: none; /* Remove os pontinhos da lista */
+            margin: 0;
+            padding: 0;
+            display: inline-flex; /* Para que a lista se ajuste ao conteúdo e vá para a direita */
+            flex-wrap: wrap;
+        }
+
+        /* Adicionado position: relative para os LIs que contêm submenu */
+        nav ul li {
+            position: relative;
+            margin: 0 18px; /* Espaçamento ajustado */
+        }
+
+        /* Estilos para links do menu pai */
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 0; /* Mais padding para links clicáveis */
+            transition: color 0.3s ease, transform 0.2s ease;
+            position: relative; /* Para o efeito de sublinhado */
+            display: block; /* Para que o padding e a largura do hover funcionem */
+        }
+
+        /* Efeito de sublinhado animado para links */
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #ffbbcd;
+            transition: width 0.3s ease;
+        }
+
+        nav ul li a:hover::after,
+        nav ul li a.active::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            color: #ffbbcd;
+            transform: translateY(-2px); /* Pequeno efeito de levantamento */
+        }
+
+        /* Estilo para ícones dentro de links do menu - NOVO */
+        nav ul li a .fas,
+        nav ul li a .far,
+        nav ul li a .fal,
+        nav ul li a .fab {
+            margin-right: 5px; /* Espaço entre o ícone e o texto, se houver */
+            font-size: 1.1em; /* Ajusta o tamanho do ícone */
+        }
+
+        /* Para o ícone de casinha, se for só ele no link do dashboard - NOVO */
+        nav ul li a .fa-home {
+            font-size: 1.3em; /* Deixa o ícone de casinha um pouco maior e mais proeminente */
+            margin-right: 0; /* Remove margem se não houver texto ao lado */
+        }
+
+        /* Estilos para o SUBMENU - COPIADO DO DASHBOARD.HTML */
+        .submenu {
+            display: none; /* Esconde o submenu por padrão */
+            position: absolute;
+            background-color: #3b506b; /* Cor de fundo do submenu */
+            min-width: 180px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            padding: 10px 0;
+            border-radius: 5px;
+            left: 50%; /* Centraliza o submenu sob o item pai */
+            transform: translateX(-50%);
+            top: 100%; /* Posiciona abaixo do item pai */
+            white-space: nowrap; /* Evita quebra de linha nos itens do submenu */
+        }
+
+        .submenu li {
+            margin: 0; /* Remove margem dos itens do submenu */
+        }
+
+        .submenu li a {
+            color: white;
+            padding: 12px 15px; /* Padding para itens do submenu */
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.2s ease;
+        }
+
+        /* CORRIGIDO: Cor de hover dos submenus para #ffccbd - COPIADO DO DASHBOARD.HTML */
+        .submenu li a:hover {
+            background-color: #ffccbd; /* Nova cor de destaque no hover do submenu */
+            color: #2c3e50; /* Cor do texto no hover para contraste */
+        }
+
+        /* Mostrar o submenu ao passar o mouse sobre o LI PAI - COPIADO DO DASHBOARD.HTML */
+        nav ul li:hover > .submenu {
+            display: block;
+        }
+
+        /* Estilos para o botão de Logout - COPIADO DO DASHBOARD.HTML */
+        .logout-btn {
+            background-color: #dc3545; /* Vermelho */
+            color: white;
+            padding: 10px 20px; /* Padding maior */
+            border: none;
+            border-radius: 6px; /* Bordas mais suaves */
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-left: 25px; /* Espaçamento do menu */
+            flex-shrink: 0;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333; /* Vermelho mais escuro no hover */
+            transform: translateY(-2px);
+        }
+
+        /* Estilos do Container Principal - AJUSTADO PARA FICAR ABAIXO DO HEADER */
         .container {
             background-color: #fff;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             max-width: 800px;
-            margin: 0 auto;
+            margin: 30px auto; /* Adicionado margem superior para espaço do header */
         }
 
         h2 {
-            color: #007bff;
+            color: black; /* Corrigido: Já estava padronizado */
             margin-bottom: 20px;
+            text-align: center; /* Centraliza o título */
         }
 
         .form-group {
@@ -61,36 +223,38 @@
             display: flex;
             align-items: center;
             margin-bottom: 10px;
+            flex-wrap: wrap; /* Adicionado para quebrar em telas menores */
+            gap: 10px; /* Espaçamento entre os elementos do grupo */
         }
 
         .procedure-group select {
-            width: 60%; /* Diminuindo a largura da seleção do procedimento */
+            flex: 3; /* Ocupa mais espaço */
+            min-width: 180px; /* Para não ficar muito pequeno em telas médias */
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
             box-sizing: border-box;
-            margin-right: 10px;
         }
 
         .procedure-group input[type="number"] {
-            width: 20%; /* Aumentando um pouco a largura do campo de valor */
+            flex: 1; /* Ocupa o restante do espaço, mas flexível */
+            min-width: 90px;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
             box-sizing: border-box;
-            margin-left: 5px;
         }
 
         .procedure-group input[type="text"] { /* Estilo para o "Especificar outro" */
-            width: 40%;
+            flex: 2; /* Ocupa mais espaço que o número */
+            min-width: 150px;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
             box-sizing: border-box;
-            margin-left: 5px;
         }
 
         .total-value {
@@ -100,24 +264,9 @@
             color: #28a745;
         }
 
-        button[type="submit"] {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-
         .add-client-button {
-            background-color: #007bff;
-            color: white;
+            background-color: #ffbbcd; /* Nova cor de fundo */
+            color: black; /* Texto preto */
             padding: 5px 10px;
             border: none;
             border-radius: 4px;
@@ -125,29 +274,64 @@
             font-size: 0.9em;
             margin-top: 5px;
             margin-left: 5px;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
             text-decoration: none;
             display: inline-flex;
+            align-items: center; /* Alinha o texto verticalmente */
+            justify-content: center; /* Centraliza o texto horizontalmente */
         }
 
         .add-client-button:hover {
-            background-color: #0056b3;
+            background-color: #da869c; /* Nova cor de hover */
+            transform: translateY(-2px);
         }
 
-        .back-button {
-            background-color: #dc3545;
-            margin-top: 10px;
-            padding: 10px 20px; /* Consistência com o botão de submit */
-            color: white;
-            border: none;
+        /* NOVO: Estilos para o grupo de botões Salvar e Voltar */
+        .button-group {
+            display: flex; /* Alinha os botões lado a lado */
+            justify-content: space-between; /* Espaça os botões */
+            gap: 15px; /* Espaço entre os botões */
+            margin-top: 30px; /* Margem superior para o grupo */
+            flex-wrap: wrap; /* Permite quebra de linha em telas menores */
+        }
+
+        /* Estilo base para todos os botões no grupo para padronizar */
+        .button-group button,
+        .button-group .button-link {
+            flex: 1; /* Faz com que os botões cresçam para ocupar o espaço */
+            min-width: 150px; /* Largura mínima para botões */
+            padding: 12px 20px; /* Padding ajustado para botões */
             border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none; /* Para o link parecer um botão */
+            display: flex; /* Para centralizar texto */
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box; /* Inclui padding e borda na largura */
         }
 
-        .back-button:hover {
-            background-color: #c82333;
+        .button-group .save-appointment-btn {
+            background-color: #ffbbcd; /* Nova cor de fundo */
+            color: black; /* Texto preto */
+            border: none;
+        }
+
+        .button-group .save-appointment-btn:hover {
+            background-color: #da869c; /* Nova cor de hover */
+            transform: translateY(-2px);
+        }
+
+        .button-group .back-to-dashboard-btn {
+            background-color: #6c757d; /* Cor do botão Adicionar Procedimento */
+            color: white; /* Cor do texto branco */
+            border: none;
+        }
+
+        .button-group .back-to-dashboard-btn:hover {
+            background-color: #5a6268; /* Hover do botão Adicionar Procedimento */
+            transform: translateY(-2px);
         }
 
         #addProcedureButton, .remove-procedure-button {
@@ -183,10 +367,170 @@
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+            /* display: block; Removido para que a função showMessage controle o display */
+        }
+
+        /* Estilo para o spinner de carregamento */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, .3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        /* Estilos para o rodapé - COPIADO DO DASHBOARD.HTML */
+        footer {
+            margin-top: auto; /* Empurra o rodapé para baixo */
+            padding: 20px;
+            text-align: center;
+            color: #777;
+            font-size: 0.9em;
+            background-color: #eef2f5; /* Fundo suave para o rodapé */
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsividade para telas menores - COMBINADO DO DASHBOARD.HTML E AGENDAMENTOS.HTML */
+        @media (max-width: 900px) {
+            header { /* COPIADO DO DASHBOARD.HTML */
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px 20px;
+            }
+            header h1 { /* COPIADO DO DASHBOARD.HTML */
+                margin-bottom: 10px;
+                text-align: center;
+                width: 100%;
+            }
+            nav { /* COPIADO DO DASHBOARD.HTML */
+                width: 100%;
+                margin-left: 0;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            nav ul { /* COPIADO DO DASHBOARD.HTML */
+                flex-direction: column;
+                align-items: center;
+                display: flex;
+                width: 100%;
+            }
+            nav ul li { /* COPIADO DO DASHBOARD.HTML */
+                margin: 5px 0;
+            }
+            .logout-btn { /* COPIADO DO DASHBOARD.HTML */
+                margin-left: 0;
+                width: 100%;
+                text-align: center;
+                padding: 12px;
+            }
+
+            /* Submenu em telas menores - COPIADO DO DASHBOARD.HTML */
+            .submenu {
+                position: static;
+                display: block !important;
+                width: 100%;
+                box-shadow: none;
+                padding: 0;
+                border-radius: 0;
+                background-color: #3b506b;
+            }
+            .submenu li a {
+                padding: 8px 30px;
+                background-color: rgba(0,0,0,0.1);
+            }
+            .submenu li a:hover {
+                background-color: #ffccbd;
+                color: #2c3e50;
+            }
+
+            /* Estilos específicos para agendamentos.html em telas menores */
+            .container {
+                padding: 20px; /* Ajusta o padding para telas menores */
+                width: 95%; /* Ocupa mais largura em telas menores */
+            }
+            .procedure-group {
+                flex-direction: column; /* Empilha os campos de procedimento */
+                align-items: stretch; /* Estica os campos para largura total */
+            }
+            .procedure-group select,
+            .procedure-group input[type="number"],
+            .procedure-group input[type="text"] {
+                width: 100% !important; /* Ocupa largura total */
+                margin-left: 0;
+                margin-right: 0;
+                margin-bottom: 10px; /* Espaço entre os campos empilhados */
+            }
+            .button-group {
+                flex-direction: column; /* Empilha os botões em telas menores */
+                align-items: stretch; /* Estica os botões para largura total */
+            }
+            .button-group button,
+            .button-group .button-link {
+                width: 100%; /* Ocupa largura total */
+                min-width: unset; /* Remove min-width */
+            }
+        }
+        @media (max-width: 500px) { /* Ajustes para telas muito pequenas */
+            .container {
+                padding: 15px;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Studio JéMarqui</h1>
+        <nav>
+            <ul>
+                <li><a href="dashboard.html" title="Início"><i class="fas fa-home"></i></a></li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Clientes</a>
+                    <ul class="submenu">
+                        <li><a href="clientes.html">Cadastrar Clientes</a></li>
+                        <li><a href="consultar_clientes.html">Consultar Clientes</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Agendamentos</a>
+                    <ul class="submenu">
+                        <li><a href="agendamentos.html" class="active">Novo Agendamento</a></li>
+                        <li><a href="agendamentos_lista.html">Lista de Agendamentos</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Transações</a>
+                    <ul class="submenu">
+                        <li><a href="transacoes.html">Livro Caixa</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Usuários</a>
+                    <ul class="submenu">
+                        <li><a href="usuarios.html">Gerenciar Usuários</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Relatórios</a>
+                    <ul class="submenu">
+                        <li><a href="relatorios.html">Visualizar Relatórios</a></li>
+                    </ul>
+                </li>
+                <li><button class="logout-btn" onclick="logout()">Sair</button></li>
+            </ul>
+        </nav>
+    </header>
+
     <div class="container">
         <h2>Novo Agendamento</h2>
         <form id="agendamentoForm">
@@ -201,7 +545,7 @@
             <div class="form-group">
                 <label>Procedimentos:</label>
                 <div id="proceduresContainer">
-                </div>
+                    </div>
                 <button type="button" id="addProcedureButton">Adicionar Procedimento</button>
             </div>
 
@@ -219,21 +563,48 @@
                 Valor Total: R$ 0.00
             </div>
 
-            <button type="submit">Salvar Agendamento</button>
         </form>
 
         <div id="agendamentoMessage" class="message"></div>
 
-        <button type="button" class="back-button" onclick="window.location.href='dashboard.html'">Voltar ao Dashboard</button>
+        <div class="button-group">
+            <button type="submit" form="agendamentoForm" class="save-appointment-btn">
+                Salvar Agendamento
+                <span class="loading-spinner" style="display: none;"></span>
+            
+        </div>
     </div>
 
+    <footer>
+        <p>&copy; 2024 Meu Estúdio. Todos os direitos reservados.</p>
+    </footer>
+
     <script>
+        // Funções JavaScript COPIADAS DO DASHBOARD.HTML
+        function toggleSubmenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (window.innerWidth <= 900) {
+                    submenu.style.display = (submenu.style.display === 'block' || submenu.style.display === '') ? 'none' : 'block';
+                }
+            }
+        }
+
+        function logout() {
+            alert('Você foi desconectado!');
+            // Em uma aplicação real, você faria uma requisição ao servidor para encerrar a sessão
+            window.location.href = 'login.html';
+        }
+
+        // SEU CÓDIGO JAVASCRIPT EXISTENTE PARA agendamentos.html
         const agendamentoForm = document.getElementById('agendamentoForm');
         const clienteSelect = document.getElementById('clienteSelect');
         const proceduresContainer = document.getElementById('proceduresContainer');
         const addProcedureButton = document.getElementById('addProcedureButton');
         const totalValueDisplay = document.querySelector('.total-value');
         const agendamentoMessageDiv = document.getElementById('agendamentoMessage');
+        const saveAppointmentBtn = document.querySelector('.save-appointment-btn');
+        const loadingSpinner = saveAppointmentBtn.querySelector('.loading-spinner');
 
         const procedimentosLista = [
             'Depilação parcial',
@@ -243,7 +614,7 @@
             'Design de sobrancelhas',
             'Outros'
         ];
-        let contadorProcedimentos = 0;
+        let contadorProcedimentos = 0; // Usado para dar nomes únicos aos campos de procedimento
 
         function showMessage(message, type) {
             agendamentoMessageDiv.textContent = message;
@@ -259,8 +630,8 @@
 
             const selectProcedimento = document.createElement('select');
             selectProcedimento.name = `procedimento_${currentCount}`;
-            selectProcedimento.style.width = '60%';
             selectProcedimento.setAttribute('data-index', currentCount);
+            selectProcedimento.setAttribute('required', 'true'); // Torna o procedimento selecionável obrigatório
 
             const optionPadrao = document.createElement('option');
             optionPadrao.value = '';
@@ -280,21 +651,22 @@
             valorInput.classList.add('valor-procedimento');
             valorInput.placeholder = 'Valor (R$)';
             valorInput.step = '0.01';
-            valorInput.style.width = '20%';
+            valorInput.min = '0'; // Garante que o valor não seja negativo
+            valorInput.setAttribute('required', 'true'); // Torna o valor obrigatório
 
             const especificarOutroInput = document.createElement('input');
             especificarOutroInput.type = 'text';
             especificarOutroInput.name = `especificarOutro_${currentCount}`;
             especificarOutroInput.placeholder = 'Especificar outro';
-            especificarOutroInput.style.display = 'none';
+            especificarOutroInput.style.display = 'none'; // Esconde por padrão
 
             const removerButton = document.createElement('button');
             removerButton.type = 'button';
             removerButton.classList.add('remove-procedure-button');
-            removerButton.textContent = 'Remover';
+            removerButton.innerHTML = '<i class="fas fa-trash-alt"></i> Remover'; // Ícone de lixeira
             removerButton.addEventListener('click', () => {
                 novoProcedimentoDiv.remove();
-                calcularValorTotal();
+                calcularValorTotal(); // Recalcula o total após remover
             });
 
             selectProcedimento.addEventListener('change', () => {
@@ -304,9 +676,9 @@
                 } else {
                     especificarOutroInput.style.display = 'none';
                     especificarOutroInput.removeAttribute('required');
-                    especificarOutroInput.value = '';
+                    especificarOutroInput.value = ''; // Limpa o valor se não for "Outros"
                 }
-                calcularValorTotal();
+                calcularValorTotal(); // Recalcula o total ao mudar o procedimento
             });
 
             valorInput.addEventListener('input', calcularValorTotal);
@@ -315,25 +687,28 @@
             novoProcedimentoDiv.appendChild(selectProcedimento);
             novoProcedimentoDiv.appendChild(valorInput);
             novoProcedimentoDiv.appendChild(especificarOutroInput);
-            // Adiciona o botão de remover apenas se já houver procedimentos (ou seja, não é o primeiro)
-            if (proceduresContainer.children.length > 0) {
-                novoProcedimentoDiv.appendChild(removerButton);
-            }
+            
+            // Adiciona o botão de remover apenas se não for o primeiro procedimento
+            // ou se você quiser que o primeiro também possa ser removido.
+            // Para simplicidade, vou adicionar o botão de remover sempre.
+            novoProcedimentoDiv.appendChild(removerButton);
+            
             proceduresContainer.appendChild(novoProcedimentoDiv);
-            calcularValorTotal();
+            calcularValorTotal(); // Recalcula o total após adicionar um novo procedimento
         }
 
         async function loadClientes() {
             try {
+                // Substitua a URL pela sua API de clientes
                 const response = await fetch('http://localhost:3001/api/clients');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const clientes = await response.json();
-                clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>';
+                clienteSelect.innerHTML = '<option value="">Selecione um cliente</option>'; // Limpa e adiciona opção padrão
                 clientes.forEach(cliente => {
                     const option = document.createElement('option');
-                    option.value = cliente._id;
+                    option.value = cliente._id; // Assumindo que o ID do cliente é '_id'
                     option.textContent = cliente.name;
                     clienteSelect.appendChild(option);
                 });
@@ -348,41 +723,71 @@
             const procedimentosGrupos = proceduresContainer.querySelectorAll('.procedure-group');
 
             procedimentosGrupos.forEach(grupo => {
-                const selectProcedimento = grupo.querySelector('select');
                 const valorInput = grupo.querySelector('.valor-procedimento');
-                const especificarOutroInput = grupo.querySelector('[name^="especificarOutro_"]');
-
-                const procedimentoNome = selectProcedimento.value;
-                const valor = parseFloat(valorInput.value) || 0;
-
-                if (procedimentoNome === 'Outros' && !especificarOutroInput.value.trim()) {
-                    return;
-                }
-                if (procedimentoNome) {
+                const valor = parseFloat(valorInput.value); 
+                // A validação completa se o procedimento está selecionado e preenchido será feita no submit
+                if (!isNaN(valor) && valor >= 0) {
                     total += valor;
                 }
             });
             totalValueDisplay.textContent = `Valor Total: R$ ${total.toFixed(2)}`;
         }
 
+        // Adiciona um novo campo de procedimento ao clicar no botão "Adicionar Procedimento"
         addProcedureButton.addEventListener('click', adicionarProcedimento);
 
+        // Lógica de submissão do formulário
         agendamentoForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            agendamentoMessageDiv.style.display = 'none';
+            e.preventDefault(); // Impede o envio padrão do formulário
+            agendamentoMessageDiv.style.display = 'none'; // Oculta mensagens anteriores
+
+            // Desabilita o botão e mostra spinner
+            saveAppointmentBtn.disabled = true;
+            saveAppointmentBtn.innerHTML = 'Salvando... <span class="loading-spinner"></span>'; // Atualiza texto e inclui spinner
 
             const clientId = clienteSelect.value;
             const dataHoraValue = document.getElementById('dataHora').value;
-            const [data, hora] = dataHoraValue.split('T');
-
-            // O status é agora fixo como "pendente"
-            const status = "pendente"; // <--- ALTERAÇÃO PRINCIPAL AQUI
-
             const observacoes = document.getElementById('observacoes').value;
-            const procedimentosAgendados = [];
-            const procedimentosGrupos = proceduresContainer.querySelectorAll('.procedure-group');
 
-            let hasValidProcedure = false;
+            // ***** CORREÇÃO AQUI: Dividir dataHoraValue em data e hora separadas *****
+            let data = '';
+            let hora = '';
+            if (dataHoraValue) {
+                const parts = dataHoraValue.split('T');
+                if (parts.length === 2) {
+                    data = parts[0]; // YYYY-MM-DD
+                    hora = parts[1]; // HH:MM
+                }
+            }
+            // *******************************************************************
+
+            // Validação de campos obrigatórios
+            if (!clientId) {
+                showMessage('Por favor, selecione um cliente.', 'error');
+                saveAppointmentBtn.disabled = false;
+                saveAppointmentBtn.innerHTML = 'Salvar Agendamento'; // Restaura o texto original do botão e oculta o spinner
+                return;
+            }
+
+            // Validação agora usa as novas variáveis 'data' e 'hora'
+            if (!data || !hora) {
+                showMessage('Por favor, selecione a data e hora do agendamento.', 'error');
+                saveAppointmentBtn.disabled = false;
+                saveAppointmentBtn.innerHTML = 'Salvar Agendamento'; // Restaura o texto original do botão e oculta o spinner
+                return;
+            }
+
+            // Coleta e validação dos procedimentos
+            const procedimentos = [];
+            const procedimentosGrupos = proceduresContainer.querySelectorAll('.procedure-group');
+            let hasIncompleteProcedure = false;
+
+            if (procedimentosGrupos.length === 0) {
+                showMessage('Adicione pelo menos um procedimento.', 'error');
+                saveAppointmentBtn.disabled = false;
+                saveAppointmentBtn.innerHTML = 'Salvar Agendamento';
+                return;
+            }
 
             procedimentosGrupos.forEach(grupo => {
                 const selectProcedimento = grupo.querySelector('select');
@@ -390,82 +795,76 @@
                 const especificarOutroInput = grupo.querySelector('[name^="especificarOutro_"]');
 
                 const procedimentoNome = selectProcedimento.value;
-                const valor = parseFloat(valorInput.value) || 0;
-                let nomeExibicao = procedimentoNome;
+                const valor = parseFloat(valorInput.value);
+                const especificacao = especificarOutroInput.value.trim();
 
-                if (procedimentoNome === 'Outros') {
-                    const especificacao = especificarOutroInput.value.trim();
-                    if (especificacao) {
-                        nomeExibicao = `Outros: ${especificacao}`;
-                    } else {
-                        return;
-                    }
-                } else if (!procedimentoNome) {
-                    return;
-                }
-
-                if (nomeExibicao && valor >= 0) {
-                    procedimentosAgendados.push({ nome: nomeExibicao, valor: valor });
-                    hasValidProcedure = true;
+                // Validação de cada procedimento: precisa de nome e valor válido
+                if (!procedimentoNome || isNaN(valor) || valor < 0 || (procedimentoNome === 'Outros' && !especificacao)) {
+                    hasIncompleteProcedure = true;
+                } else {
+                    procedimentos.push({
+                        nome: procedimentoNome === 'Outros' ? especificacao : procedimentoNome,
+                        valor: valor
+                    });
                 }
             });
 
-            if (!clientId) {
-                showMessage('Por favor, selecione um cliente.', 'error');
+            if (hasIncompleteProcedure) {
+                showMessage('Por favor, preencha todos os campos dos procedimentos corretamente (nome e valor).', 'error');
+                saveAppointmentBtn.disabled = false;
+                saveAppointmentBtn.innerHTML = 'Salvar Agendamento';
                 return;
             }
 
-            if (!data || !hora) {
-                showMessage('Por favor, selecione a data e a hora do agendamento.', 'error');
-                return;
-            }
+            // Cálculo do valor total final
+            const valorTotalCalculado = parseFloat(totalValueDisplay.textContent.replace('Valor Total: R$ ', ''));
 
-            if (!hasValidProcedure) {
-                showMessage('Por favor, selecione e preencha pelo menos um procedimento com um valor válido.', 'error');
-                return;
-            }
-
-            const novoAgendamento = {
+            const agendamentoData = {
                 clientId: clientId,
-                date: data,
-                time: hora,
-                status: status, // Enviando sempre "pendente"
+                data: data, // Envia a data separadamente
+                hora: hora, // Envia a hora separadamente
+                procedimentos: procedimentos,
                 observacoes: observacoes,
-                procedimentos: procedimentosAgendados,
-                valorTotal: parseFloat(totalValueDisplay.textContent.split('R$ ')[1])
+                valorTotal: valorTotalCalculado
             };
 
             try {
                 const response = await fetch('http://localhost:3001/api/agendamentos', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(novoAgendamento),
+                    body: JSON.stringify(agendamentoData)
                 });
 
-                if (response.ok) {
-                    showMessage('Agendamento salvo com sucesso!', 'success');
-                    agendamentoForm.reset();
-                    proceduresContainer.innerHTML = '';
-                    contadorProcedimentos = 0;
-                    adicionarProcedimento();
-                    calcularValorTotal();
-                    loadClientes();
-                } else {
-                    const errorData = await response.json();
-                    showMessage(`Erro ao salvar agendamento: ${errorData.message || 'Erro desconhecido'}`, 'error');
+                if (!response.ok) {
+                    const errorResponse = await response.json(); // Tenta ler a mensagem de erro do backend
+                    const errorMessage = errorResponse.message || `Erro desconhecido: ${response.status}`;
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorMessage}`);
                 }
+
+                const result = await response.json();
+                console.log('Agendamento salvo com sucesso:', result);
+                showMessage('Agendamento salvo com sucesso!', 'success');
+                agendamentoForm.reset(); // Limpa o formulário
+                proceduresContainer.innerHTML = ''; // Remove todos os procedimentos adicionados
+                adicionarProcedimento(); // Adiciona um campo de procedimento vazio novamente
+                calcularValorTotal(); // Zera o valor total
 
             } catch (error) {
                 console.error('Erro ao salvar agendamento:', error);
-                showMessage('Erro ao salvar agendamento: Falha na comunicação com o servidor. Verifique se o backend está rodando.', 'error');
+                showMessage(`Erro ao salvar agendamento: ${error.message}`, 'error');
+            } finally {
+                saveAppointmentBtn.disabled = false;
+                saveAppointmentBtn.innerHTML = 'Salvar Agendamento'; // Restaura o texto original do botão e oculta o spinner
             }
         });
 
-        // Inicializações: Adiciona o primeiro procedimento e carrega clientes
-        adicionarProcedimento();
-        loadClientes();
+        // Inicializa com um campo de procedimento vazio ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            loadClientes();
+            adicionarProcedimento();
+        });
     </script>
 </body>
 </html>

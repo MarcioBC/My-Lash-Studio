@@ -270,13 +270,6 @@
             border: 1px solid #f5c6cb;
         }
 
-        /* Animação de fade-out para quando o item é removido */
-        .removing {
-            opacity: 0;
-            transform: translateX(-100%);
-            transition: all 0.5s ease;
-        }
-
         /* Estilos para o rodapé - COPIADO DO DASHBOARD.HTML */
         footer {
             margin-top: auto; /* Empurra o rodapé para baixo */
@@ -494,8 +487,6 @@
 
                 agendamentos.forEach(agendamento => {
                     const row = agendamentosTableBody.insertRow();
-                    // Adiciona um atributo data-id para facilitar a remoção posterior
-                    row.setAttribute('data-id', agendamento._id);
 
                     // Coluna 1: ID (Primeiros 6 caracteres do ID)
                     row.insertCell().textContent = agendamento._id.substring(0, 6);
@@ -537,7 +528,7 @@
                     const deleteButton = document.createElement('button');
                     deleteButton.textContent = 'Excluir';
                     deleteButton.classList.add('module-button', 'delete-button');
-                    deleteButton.onclick = () => deleteAgendamento(agendamento._id, row);
+                    deleteButton.onclick = () => deleteAgendamento(agendamento._id);
                     actionsCell.appendChild(deleteButton);
 
                     // Botão de Confirmar (visível apenas se o status for "pendente")
@@ -556,30 +547,16 @@
             }
         }
 
-        async function deleteAgendamento(id, row) {
+        async function deleteAgendamento(id) {
             if (confirm("Tem certeza que deseja excluir este agendamento?")) {
                 try {
                     const response = await fetch(`http://localhost:3001/api/agendamentos/${id}`, {
                         method: 'DELETE',
                     });
-                    
                     // Para DELETE, o status 204 (No Content) é comum e não retorna JSON
-                    if (response.status === 204 || response.ok) {
+                    if (response.status === 204) {
                         showMessage('Agendamento excluído com sucesso!', 'success');
-                        
-                        // Remove a linha da tabela imediatamente com animação
-                        row.classList.add('removing');
-                        setTimeout(() => {
-                            if (row.parentNode) {
-                                row.parentNode.removeChild(row);
-                            }
-                            // Verifica se ainda há linhas na tabela
-                            const remainingRows = agendamentosTableBody.querySelectorAll('tr:not(.removing)');
-                            if (remainingRows.length === 0) {
-                                agendamentosTableBody.innerHTML = '<tr><td colspan="8">Nenhum agendamento encontrado.</td></tr>';
-                            }
-                        }, 500); // Tempo da animação CSS
-                        
+                        loadAgendamentos();
                     } else {
                         const data = await response.json(); // Tenta ler JSON para mensagens de erro
                         showMessage(data.message || 'Erro desconhecido ao excluir agendamento.', 'error');

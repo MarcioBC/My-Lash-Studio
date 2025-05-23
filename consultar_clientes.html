@@ -4,225 +4,449 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consultar Clientes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        /* Estilos gerais para o corpo - PADRONIZADO COM DASHBOARD.HTML */
         body {
-            font-family: 'Arial', sans-serif; /* Fonte mais profissional */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f4f7f6; /* Fundo suave */
+            padding: 0;
+            background-color: #f4f7f6; /* Cor de fundo do dashboard */
             color: #333;
             line-height: 1.6;
+            min-height: 100vh; /* Garante que o corpo ocupe toda a altura da viewport */
+            display: flex;
+            flex-direction: column; /* Para que o header fique no topo e o conteúdo abaixo */
         }
 
+        /* Estilos para o cabeçalho (onde o menu ficará) - COPIADO DO DASHBOARD.HTML */
+        header {
+            background-color: #2c3e50; /* Cor de fundo escura para o cabeçalho */
+            color: white;
+            padding: 15px 30px; /* Ajustado para 30px nas laterais para melhor espaçamento */
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Sombra mais suave */
+            display: flex;
+            justify-content: space-between; /* Espaço entre o título e o menu */
+            align-items: center; /* Alinha verticalmente */
+            flex-wrap: wrap; /* Permite quebra de linha em telas menores */
+            position: sticky; /* Menu fixo no topo ao rolar */
+            top: 0;
+            z-index: 1000; /* Garante que fique acima de outros elementos */
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 26px; /* Ajustado para um tamanho consistente */
+            font-weight: 600;
+            color: #ffbbcd;
+        }
+
+        /* Estilos para a navegação (o menu em si) - COPIADO DO DASHBOARD.HTML */
+        nav {
+            flex-grow: 1; /* Permite que a navegação ocupe espaço para empurrar os itens à direita */
+            text-align: right; /* Alinha o texto do nav para a direita */
+            margin-left: 20px; /* Espaço entre o título e o menu */
+        }
+
+        nav ul {
+            list-style: none; /* Remove os pontinhos da lista */
+            margin: 0;
+            padding: 0;
+            display: inline-flex; /* Para que a lista se ajuste ao conteúdo e vá para a direita */
+            flex-wrap: wrap;
+        }
+
+        /* Adicionado position: relative para os LIs que contêm submenu - COPIADO DO DASHBOARD.HTML */
+        nav ul li {
+            position: relative;
+            margin: 0 18px; /* Espaçamento ajustado */
+        }
+
+        /* Estilos para links do menu pai - COPIADO DO DASHBOARD.HTML */
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 0; /* Mais padding para links clicáveis */
+            transition: color 0.3s ease, transform 0.2s ease;
+            position: relative; /* Para o efeito de sublinhado */
+            display: block; /* Para que o padding e a largura do hover funcionem */
+        }
+
+        /* Efeito de sublinhado animado para links - COPIADO DO DASHBOARD.HTML */
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #ffbbcd;
+            transition: width 0.3s ease;
+        }
+
+        nav ul li a:hover::after,
+        nav ul li a.active::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            color: #ffbbcd;
+            transform: translateY(-2px); /* Pequeno efeito de levantamento */
+        }
+
+        /* Estilo para ícones dentro de links do menu - COPIADO DO DASHBOARD.HTML */
+        nav ul li a .fas,
+        nav ul li a .far,
+        nav ul li a .fal,
+        nav ul li a .fab {
+            margin-right: 5px; /* Espaço entre o ícone e o texto, se houver */
+            font-size: 1.1em; /* Ajusta o tamanho do ícone */
+        }
+
+        /* Para o ícone de casinha, se for só ele no link do dashboard - COPIADO DO DASHBOARD.HTML */
+        nav ul li a .fa-home {
+            font-size: 1.3em; /* Deixa o ícone de casinha um pouco maior e mais proeminente */
+            margin-right: 0; /* Remove margem se não houver texto ao lado */
+        }
+
+        /* Estilos para o SUBMENU - COPIADO DO DASHBOARD.HTML */
+        .submenu {
+            display: none; /* Esconde o submenu por padrão */
+            position: absolute;
+            background-color: #3b506b; /* Cor de fundo do submenu */
+            min-width: 180px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            padding: 10px 0;
+            border-radius: 5px;
+            left: 50%; /* Centraliza o submenu sob o item pai */
+            transform: translateX(-50%);
+            top: 100%; /* Posiciona abaixo do item pai */
+            white-space: nowrap; /* Evita quebra de linha nos itens do submenu */
+        }
+
+        .submenu li {
+            margin: 0; /* Remove margem dos itens do submenu */
+        }
+
+        .submenu li a {
+            color: white;
+            padding: 12px 15px; /* Padding para itens do submenu */
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.2s ease;
+        }
+
+        /* CORRIGIDO: Cor de hover dos submenus para #ffccbd - COPIADO DO DASHBOARD.HTML */
+        .submenu li a:hover {
+            background-color: #ffccbd; /* Nova cor de destaque no hover do submenu */
+            color: #2c3e50; /* Cor do texto no hover para contraste */
+        }
+
+        /* Mostrar o submenu ao passar o mouse sobre o LI PAI - COPIADO DO DASHBOARD.HTML */
+        nav ul li:hover > .submenu {
+            display: block;
+        }
+
+        /* Estilos para o botão de Logout - COPIADO DO DASHBOARD.HTML */
+        .logout-btn {
+            background-color: #dc3545; /* Vermelho */
+            color: white;
+            padding: 10px 20px; /* Padding maior */
+            border: none;
+            border-radius: 6px; /* Bordas mais suaves */
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-left: 25px; /* Espaçamento do menu */
+            flex-shrink: 0;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333; /* Vermelho mais escuro no hover */
+            transform: translateY(-2px);
+        }
+
+        /* Estilos do Container Principal - AJUSTADO PARA FICAR ABAIXO DO HEADER */
         .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 900px; /* Aumentado para melhor visualização */
-            margin: 30px auto; /* Centraliza e adiciona margem */
+            background-color: #fff;
+            padding: 10px; /* Ajustado padding */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 85%;
+            max-width: 800px;
+            margin: 30px auto; /* Adicionado margem para centralizar e dar espaço do header */
+            flex-grow: 1; /* Permite que o container ocupe o espaço restante antes do footer */
         }
 
+        /* Título da lista - CORRIGIDO COR PARA PADRÃO DO DASHBOARD */
         h2 {
-            color: #2c3e50; /* Cor de título harmoniosa */
-            margin-bottom: 25px;
+            color: #2c3e50; /* PADRONIZADO COM A COR DE TÍTULOS DO DASHBOARD */
+            margin-bottom: 20px;
             text-align: center;
-            font-size: 2em;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 25px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Sombra para tabela */
+            margin-top: 20px;
         }
 
         th, td {
-            border: 1px solid #e0e0e0; /* Bordas mais suaves */
-            padding: 12px 15px; /* Mais padding */
+            border: 1px solid #ddd;
+            padding: 2px;
             text-align: left;
         }
 
         th {
-            background-color: #eef4f7; /* Fundo para o cabeçalho */
-            color: #444;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.9em;
+            background-color: #f2f2f2;
         }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9; /* Linhas zebradas */
-        }
-        
-        tr:hover {
-            background-color: #f1f1f1; /* Efeito hover nas linhas */
-        }
-
 
         .actions {
             display: flex;
-            gap: 8px; /* Espaçamento menor entre os botões de ação */
+            gap: 10px;
             justify-content: center;
-            flex-wrap: wrap; /* Para responsividade */
+           
         }
 
         .edit-button, .delete-button {
-            background-color: #3498db; /* Azul primário para Editar */
-            color: white;
+            background-color: #ffc107;
+            color: #333;
             border: none;
-            padding: 8px 12px;
-            border-radius: 5px; /* Bordas mais arredondadas */
+            padding: 6px 12px;
+            border-radius: 4px;
             cursor: pointer;
             text-decoration: none;
-            font-size: 0.85em; /* Fonte ligeiramente menor */
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .edit-button {
-            background-color: #2ecc71; /* Verde para Editar (mais intuitivo) */
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
         }
 
         .delete-button {
-            background-color: #e74c3c; /* Vermelho para Excluir */
+            background-color: #dc3545;
+            color: white;
         }
 
         .edit-button:hover {
-            background-color: #27ae60;
-            transform: translateY(-1px);
+            background-color: #e0a800;
         }
 
         .delete-button:hover {
-            background-color: #c0392b;
-            transform: translateY(-1px);
+            background-color: #c82333;
         }
+
         
-        .edit-button:active, .delete-button:active {
-            transform: translateY(0);
-        }
-
-
-        .back-button-container {
+        /* Estilos para o rodapé - COPIADO DO DASHBOARD.HTML */
+        footer {
+            margin-top: auto; /* Empurra o rodapé para baixo */
+            padding: 20px;
             text-align: center;
-            margin-top: 30px;
+            color: #777;
+            font-size: 0.9em;
+            background-color: #eef2f5; /* Fundo suave para o rodapé */
+            border-top: 1px solid #e0e0e0;
         }
 
-        .back-button {
-            background-color: #6c757d;
-            color: white;
-            padding: 12px 25px; /* Mais padding para o botão voltar */
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            text-decoration: none;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
+        /* Responsividade para telas menores - COMBINADO DO DASHBOARD.HTML E CONSULTAR_CLIENTES.HTML */
+        @media (max-width: 900px) {
+            header { /* COPIADO DO DASHBOARD.HTML */
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px 20px;
+            }
+            header h1 { /* COPIADO DO DASHBOARD.HTML */
+                margin-bottom: 10px;
+                text-align: center;
+                width: 100%;
+            }
+            nav { /* COPIADO DO DASHBOARD.HTML */
+                width: 100%;
+                margin-left: 0;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            nav ul { /* COPIADO DO DASHBOARD.HTML */
+                flex-direction: column;
+                align-items: center;
+                display: flex;
+                width: 100%;
+            }
+            nav ul li { /* COPIADO DO DASHBOARD.HTML */
+                margin: 5px 0;
+            }
+            .logout-btn { /* COPIADO DO DASHBOARD.HTML */
+                margin-left: 0;
+                width: 100%;
+                text-align: center;
+                padding: 12px;
+            }
 
-        .back-button:hover {
-            background-color: #5a6268;
-            transform: translateY(-1px);
-        }
-        
-        .back-button:active {
-            transform: translateY(0);
-        }
+            /* Submenu em telas menores - COPIADO DO DASHBOARD.HTML */
+            .submenu {
+                position: static;
+                display: block !important;
+                width: 100%;
+                box-shadow: none;
+                padding: 0;
+                border-radius: 0;
+                background-color: #3b506b;
+            }
+            .submenu li a {
+                padding: 8px 30px;
+                background-color: rgba(0,0,0,0.1);
+            }
+            .submenu li a:hover {
+                background-color: #ffccbd;
+                color: #2c3e50;
+            }
 
-        /* Responsividade */
-        @media (max-width: 768px) {
+            /* Estilos específicos para consultar_clientes.html (lista) em telas menores */
             .container {
-                padding: 20px;
-                margin: 20px auto;
+                padding: 20px; /* Ajusta o padding para telas menores */
+                width: 95%; /* Ocupa mais largura em telas menores */
             }
             h2 {
-                font-size: 1.8em;
+                font-size: 1.8em; /* Reduz o tamanho do título em telas menores */
+            }
+            table {
+                font-size: 0.9em; /* Reduz o tamanho da fonte da tabela */
             }
             th, td {
-                padding: 10px;
-                font-size: 0.9em;
+                padding: 6px; /* Reduz o padding das células */
             }
             .actions {
                 flex-direction: column; /* Empilha os botões de ação */
-                gap: 5px;
+                gap: 5px; /* Reduz o espaçamento entre botões */
             }
             .edit-button, .delete-button {
-                width: 100%; /* Ocupa a largura total */
-                padding: 10px;
+                width: 100%; /* Botões de ação ocupam largura total */
+                padding: 6px 8px; /* Ajusta padding dos botões de ação */
             }
         }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
+        @media (max-width: 500px) { /* Ajustes para telas muito pequenas */
             .container {
                 padding: 15px;
             }
-            th, td {
-                font-size: 0.8em;
+            h2 {
+                font-size: 1.5em;
             }
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Studio JéMarqui</h1>
+        <nav>
+            <ul>
+                <li><a href="dashboard.html"><i class="fas fa-home"></i></a></li>
+
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Clientes</a>
+                    <ul class="submenu">
+                        <li><a href="clientes.html">Cadastrar Clientes</a></li>
+                        <li><a href="consultar_clientes.html" class="active">Consultar Clientes</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Agendamentos</a>
+                    <ul class="submenu">
+                        <li><a href="agendamentos.html">Novo Agendamento</a></li>
+                        <li><a href="agendamentos_lista.html">Lista de Agendamentos</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Transações</a>
+                    <ul class="submenu">
+                        <li><a href="transacoes.html">Livro Caixa</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Usuários</a>
+                    <ul class="submenu">
+                        <li><a href="usuarios.html">Gerenciar Usuários</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Relatórios</a>
+                    <ul class="submenu">
+                        <li><a href="relatorios.html">Visualizar Relatórios</a></li>
+                    </ul>
+                </li>
+                <li><button class="logout-btn" onclick="logout()">Sair</button></li>
+            </ul>
+        </nav>
+    </header>
+
     <div class="container">
         <h2>Lista de Clientes</h2>
         <table id="clientesTable">
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Nome</th>
                     <th>Telefone</th>
-                    <th>Email</th> <th>Ações</th>
+                    <th>Email</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 </tbody>
         </table>
-        <div class="back-button-container">
-            <a href="dashboard.html" class="back-button">Voltar ao Dashboard</a>
-        </div>
-    </div>
+        
+    <footer>
+        <p>&copy; 2024 Meu Estúdio. Todos os direitos reservados.</p>
+    </footer>
 
     <script>
+        // Funções JavaScript COPIADAS DO DASHBOARD.HTML
+        function toggleSubmenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (window.innerWidth <= 900) {
+                    submenu.style.display = (submenu.style.display === 'block' || submenu.style.display === '') ? 'none' : 'block';
+                }
+            }
+        }
+
+        function logout() {
+            alert('Você foi desconectado!');
+            window.location.href = 'login.html';
+        }
+
+        // SEU CÓDIGO JAVASCRIPT EXISTENTE PARA consultar_clientes.html
         const clientesTableBody = document.getElementById('clientesTable').getElementsByTagName('tbody')[0];
 
         async function loadClientes() {
             try {
-                const response = await fetch('http://localhost:3001/api/clients'); 
-                
+                const response = await fetch('http://localhost:3001/api/clients');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const clientes = await response.json();
-
-                // LIMPA A TABELA ANTES DE ADICIONAR NOVOS CLIENTES
-                clientesTableBody.innerHTML = ''; 
-
+                clientesTableBody.innerHTML = ''; // Limpa a tabela antes de popular
                 clientes.forEach(cliente => {
                     const row = clientesTableBody.insertRow();
-                    // Removido: const idCell = row.insertCell();
+                    const idCell = row.insertCell();
                     const nomeCell = row.insertCell();
                     const telefoneCell = row.insertCell();
                     const emailCell = row.insertCell();
                     const actionsCell = row.insertCell();
                     actionsCell.classList.add('actions');
 
-                    // Removido: idCell.textContent = cliente._id;
+                    idCell.textContent = cliente._id;
                     nomeCell.textContent = cliente.name;
                     telefoneCell.textContent = cliente.phone;
-                    emailCell.textContent = cliente.email || 'N/A'; // Adicione um fallback caso email não exista no cliente
+                    emailCell.textContent = cliente.email || ''; // Adicionado para garantir vazio em vez de "null"
 
-                    // Botão EDITAR
                     const editButton = document.createElement('a');
-                    editButton.href = `clientes_editar.html?id=${cliente._id}`; 
+                    editButton.href = `clientes_editar.html?id=${cliente._id}`; /* Ajustado para clientes_editar.html */
                     editButton.textContent = 'Editar';
                     editButton.classList.add('edit-button');
                     actionsCell.appendChild(editButton);
 
-                    // Botão EXCLUIR
                     const deleteButton = document.createElement('button');
                     deleteButton.textContent = 'Excluir';
                     deleteButton.classList.add('delete-button');
@@ -243,7 +467,7 @@
                     });
                     if (response.ok) {
                         alert('Cliente excluído com sucesso!');
-                        loadClientes(); // Recarrega a lista para refletir a exclusão
+                        loadClientes(); // Recarrega a lista
                     } else {
                         const errorData = await response.json();
                         alert(`Erro ao excluir cliente: ${errorData.message || 'Erro desconhecido'}`);
@@ -255,8 +479,7 @@
             }
         }
 
-        // Carrega os clientes quando a página é carregada
-        document.addEventListener('DOMContentLoaded', loadClientes);
+        loadClientes();
     </script>
 </body>
 </html>

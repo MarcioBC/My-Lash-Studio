@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Agendamentos</title>
+    <title>Gerenciamento de Usuários</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Estilos gerais para o corpo - PADRONIZADO COM DASHBOARD.HTML */
@@ -81,7 +81,7 @@
             height: 2px;
             bottom: 0;
             left: 0;
-           background-color: #ffbbcd;
+            background-color: #ffbbcd;
             transition: width 0.3s ease;
         }
 
@@ -96,7 +96,7 @@
             transform: translateY(-2px); /* Pequeno efeito de levantamento */
         }
 
-        /* Estilo para ícones dentro de links do menu - COPIADO DO DASHBOARD.HTML */
+        /* Estilo para ícones dentro de links do menu - NOVO, COPIADO DO CLIENTES.HTML */
         nav ul li a .fas,
         nav ul li a .far,
         nav ul li a .fal,
@@ -105,7 +105,7 @@
             font-size: 1.1em; /* Ajusta o tamanho do ícone */
         }
 
-        /* Para o ícone de casinha, se for só ele no link do dashboard - COPIADO DO CLIENTES.HTML */
+        /* Para o ícone de casinha, se for só ele no link do dashboard - NOVO, COPIADO DO CLIENTES.HTML */
         nav ul li a .fa-home {
             font-size: 1.3em; /* Deixa o ícone de casinha um pouco maior e mais proeminente */
             margin-right: 0; /* Remove margem se não houver texto ao lado */
@@ -173,108 +173,192 @@
 
         /* Estilos do Container Principal - AJUSTADO PARA FICAR ABAIXO DO HEADER */
         .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            width: 90%;
             max-width: 1200px;
-            margin: 30px auto; /* Adicionado margem superior para espaço do header */
+            margin: 30px auto; /* Ajustado para espaço do header */
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
+
+
+        /* Título principal da página - AGORA É H2, ANTES ERA H1 */
         h2 {
-            color:black;
-            margin-bottom: 20px;
+            color: black; /* Corrigido para a cor do tema */
             text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 22px; /* Definindo o tamanho da fonte */
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .actions {
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .module-button {
+        
+        /* Estilos do Botão Geral (btn) - base para os botões existentes */
+        .btn {
+            padding: 12px 25px;
             border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            text-decoration: none;
-            font-size: 0.9em;
-            transition: background-color 0.3s ease;
-            white-space: nowrap;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none; /* Se for um link */
+            display: inline-flex; /* Para alinhar botões e centralizar texto */
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box; /* Inclui padding e borda na largura */
+            white-space: nowrap; /* Impede que o texto quebre linha nos botões */
         }
 
-        .edit-button {
-            background-color: #ffc107;
-            color: #333;
-        }
-
-        .delete-button {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .confirm-button {
+        /* Cores base para os botões existentes (fora do grupo inferior) */
+        .btn-primary-default { /* Para o 'Cadastrar Novo Usuário' original */
             background-color: #28a745;
             color: white;
         }
-
-        .edit-button:hover {
-            background-color: #e0a800;
-        }
-
-        .delete-button:hover {
-            background-color: #c82333;
-        }
-
-        .confirm-button:hover {
+        .btn-primary-default:hover {
             background-color: #218838;
         }
 
-        #message {
+        .btn-secondary-default { /* Para o 'Atualizar Lista' original */
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary-default:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-danger {
+            background-color: #dc3545; /* Vermelho para perigo/excluir */
+            color: white; /* Adicionado para garantir cor do texto */
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        /* NOVO: Estilos para o grupo de botões na parte inferior */
+        .bottom-buttons-group {
+            display: flex; /* Alinha os botões lado a lado */
+            justify-content: center; /* Centraliza o grupo de botões */
+            gap: 15px; /* Espaço entre os botões */
+            margin-top: 40px; /* Margem superior para o grupo, abaixo da tabela */
+            margin-bottom: 20px; /* Margem inferior */
+            flex-wrap: wrap; /* Permite quebra de linha em telas menores */
+        }
+
+        /* PADRONIZAÇÃO DOS BOTÕES NO GRUPO INFERIOR */
+        .bottom-buttons-group .btn {
+            width: 200px; /* Largura fixa, ajuste conforme necessário */
+            height: 50px; /* Altura fixa, ajuste conforme necessário */
+            font-size: 15px; /* Tamanho da fonte padronizado */
+            flex-grow: 0;
+            flex-shrink: 0;
+            padding: 0; /* Remove padding padrão para que width/height sejam mais consistentes */
+        }
+
+        /* NOVO: Estilo para o botão "Cadastrar Novo Usuário" no grupo inferior */
+        .btn-register-new-user {
+            background-color: #ffbbcd; /* Nova cor de fundo */
+            color: black; /* Texto preto */
+            border: none;
+        }
+        .btn-register-new-user:hover {
+            background-color: #da869c; /* Nova cor de hover */
+            transform: translateY(-2px);
+        }
+
+        /* Estilo para o botão "Atualizar Lista" (mantendo a cor original do arquivo) */
+        .btn-refresh-list {
+            background-color: #28a745; /* Cor original do btn-primary-default */
+            color: white;
+            border: none;
+        }
+        .btn-refresh-list:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        /* Estilos da Tabela */
+        .table-responsive {
+            overflow-x: auto; /* Para tabelas grandes em telas pequenas */
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden; /* Para border-radius funcionar com a borda */
+        }
+
+        .user-table th, .user-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap; /* Impede quebra de linha dentro das células */
+        }
+
+        .user-table th {
+            background-color: #e9ecef; /* Cinza claro para cabeçalho */
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .user-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa; /* Fundo mais claro para linhas pares */
+        }
+
+        .user-table tbody tr:hover {
+            background-color: #e2e6ea; /* Fundo mais escuro no hover da linha */
+            cursor: pointer; /* Indica que a linha pode ser clicável (futuramente) */
+        }
+
+        /* Estilos para células de ação (se houver) */
+        .user-table .actions {
+            white-space: nowrap; /* Evita que os botões quebrem linha */
+        }
+
+        .user-table .actions .action-btn {
+            background: none;
+            border: none;
+            color: #007bff; /* Azul padrão para ações */
+            cursor: pointer;
+            font-size: 15px;
+            margin-right: 10px;
+            transition: color 0.2s ease;
+        }
+
+        .user-table .actions .action-btn:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .user-table .actions .action-btn.delete {
+            color: #dc3545; /* Vermelho para excluir */
+        }
+
+        .user-table .actions .action-btn.delete:hover {
+            color: #c82333;
+        }
+
+        /* Mensagens de feedback */
+        .message {
             padding: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             border-radius: 5px;
-            display: none;
             text-align: center;
-            font-weight: bold;
         }
 
-        .message-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message-error {
+        .message.error {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
 
-        /* Animação de fade-out para quando o item é removido */
-        .removing {
-            opacity: 0;
-            transform: translateX(-100%);
-            transition: all 0.5s ease;
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         /* Estilos para o rodapé - COPIADO DO DASHBOARD.HTML */
@@ -341,30 +425,23 @@
                 color: #2c3e50;
             }
 
-            /* Estilos específicos para agendamentos_lista.html em telas menores */
+            /* Estilos específicos para usuarios.html em telas menores */
             .container {
                 padding: 15px;
-                width: 98%;
+                width: 98%; /* Ocupa mais largura em telas pequenas */
             }
-            /* Torna a tabela rolavel horizontalmente em telas pequenas */
-            table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap; /* Evita quebra de linha dentro das células */
-                width: 100%; /* Garante que a tabela use toda a largura disponível antes de rolar */
+            .bottom-buttons-group {
+                flex-direction: column; /* Empilha os botões em telas menores */
+                align-items: stretch; /* Estica os botões para largura total */
             }
-            /* Garante que as células da tabela não quebrem a linha */
-            th, td {
-                white-space: nowrap;
-                min-width: 80px; /* Garante uma largura mínima para as colunas */
+            .bottom-buttons-group .btn {
+                width: 100%; /* Ocupa largura total */
+                min-width: unset; /* Remove min-width */
+                height: 45px; /* Altura um pouco menor para telas pequenas */
+                font-size: 14px; /* Fonte menor em telas pequenas */
             }
-            .actions {
-                flex-direction: column; /* Empilha os botões de ação */
-                align-items: stretch;
-            }
-            .module-button {
-                width: 100%; /* Botões de ação ocupam 100% da largura na coluna */
-                margin-bottom: 5px; /* Espaço entre os botões empilhados */
+            .user-table th, .user-table td {
+                padding: 10px; /* Menor padding para células da tabela */
             }
         }
         @media (max-width: 500px) { /* Ajustes para telas muito pequenas */
@@ -407,7 +484,7 @@
                 <li class="menu-item-with-submenu">
                     <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Usuários</a>
                     <ul class="submenu">
-                        <li><a href="usuarios.html">Gerenciar Usuários</a></li>
+                        <li><a href="usuarios.html" class="active">Gerenciar Usuários</a></li>
                     </ul>
                 </li>
                 <li class="menu-item-with-submenu">
@@ -422,25 +499,36 @@
     </header>
 
     <div class="container">
-        <h2>Lista de Agendamentos</h2>
-        <div id="message"></div>
-        <table id="agendamentosTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Cliente</th>
-                    <th>Data e Hora</th>
-                    <th>Procedimentos</th>
-                    <th>Valor Total</th>
-                    <th>Status</th>
-                    <th>Observações</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="agendamentosBody">
-            </tbody>
-        </table>
+        <h2>Gerenciamento de Usuários</h2>
+
+        <div id="userListContainer" class="table-responsive">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Nome de Usuário</th>
+                        <th>Email</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    </tbody>
+            </table>
+            <p id="loadingMessage" style="text-align: center; margin-top: 20px;">Carregando usuários...</p>
         </div>
+
+        <div class="bottom-buttons-group">
+          
+            <button class="btn btn-refresh-list" onclick="refreshUserList()">Atualizar Lista</button>
+            <button class="btn btn-register-new-user" onclick="openRegistrationModal()">Cadastrar Novo Usuário</button>
+        </div>
+    </div>
+
+    <div id="registrationModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+        <div style="background:#fff; padding:20px; border-radius:8px;">
+            <h2>Registrar Novo Usuário</h2>
+            <button onclick="closeRegistrationModal()">Fechar</button>
+        </div>
+    </div>
 
     <footer>
         <p>&copy; 2024 Meu Estúdio. Todos os direitos reservados.</p>
@@ -451,6 +539,7 @@
         function toggleSubmenu(element) {
             const submenu = element.nextElementSibling;
             if (submenu && submenu.classList.contains('submenu')) {
+                // Em telas pequenas (mobile), toogle o display
                 if (window.innerWidth <= 900) {
                     submenu.style.display = (submenu.style.display === 'block' || submenu.style.display === '') ? 'none' : 'block';
                 }
@@ -459,166 +548,101 @@
 
         function logout() {
             alert('Você foi desconectado!');
+            // Redireciona para a página de login
             window.location.href = 'login.html';
         }
 
-        // SEU CÓDIGO JAVASCRIPT EXISTENTE PARA agendamentos_lista.html
-        const agendamentosTableBody = document.getElementById('agendamentosTable').getElementsByTagName('tbody')[0];
-        const messageDiv = document.getElementById('message');
+        // SEU CÓDIGO JAVASCRIPT EXISTENTE PARA usuarios.html
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUsers(); // Carrega os usuários ao carregar a página
+        });
 
-        function showMessage(msg, type) {
-            messageDiv.textContent = msg;
-            messageDiv.className = '';
-            messageDiv.classList.add(type === 'success' ? 'message-success' : 'message-error');
-            messageDiv.style.display = 'block';
-            setTimeout(() => { messageDiv.style.display = 'none'; }, 3000);
-        }
+        async function fetchUsers() {
+            const usersTableBody = document.getElementById('usersTableBody');
+            const loadingMessage = document.getElementById('loadingMessage');
+            if (loadingMessage) loadingMessage.style.display = 'block';
+            if (usersTableBody) usersTableBody.innerHTML = ''; // Limpa a tabela antes de carregar
 
-        async function loadAgendamentos() {
             try {
-                // Modificado para chamar a rota principal /api/agendamentos
-                // que já retorna os dados populados e formatados
-                const agendamentosResponse = await fetch('http://localhost:3001/api/agendamentos');
-                if (!agendamentosResponse.ok) {
-                    throw new Error(`HTTP error! status: ${agendamentosResponse.status}`);
+                const response = await fetch('http://localhost:3001/api/users');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Erro HTTP! Status: ${response.status}`);
                 }
-                // O backend já deve retornar os dados com clienteNome, procedimentosNomes, data e hora formatados
-                const agendamentos = await agendamentosResponse.json();
-
-                agendamentosTableBody.innerHTML = ''; // Limpa a tabela antes de preencher
-
-                if (agendamentos.length === 0) {
-                    agendamentosTableBody.innerHTML = '<tr><td colspan="8">Nenhum agendamento encontrado.</td></tr>';
-                    return;
-                }
-
-                agendamentos.forEach(agendamento => {
-                    const row = agendamentosTableBody.insertRow();
-                    // Adiciona um atributo data-id para facilitar a remoção posterior
-                    row.setAttribute('data-id', agendamento._id);
-
-                    // Coluna 1: ID (Primeiros 6 caracteres do ID)
-                    row.insertCell().textContent = agendamento._id.substring(0, 6);
-
-                    // Coluna 2: Cliente (Nome) - Agora vem diretamente do backend
-                    row.insertCell().textContent = agendamento.clienteNome || 'Cliente Desconhecido';
-
-                    // Coluna 3: Data e Hora - **MANTER COMO ESTÁ, POIS O BACKEND DEVE ENVIAR `data` E `hora` JÁ FORMATADOS.**
-                    // SE CONTINUAR SAINDO N/A, VOCÊ PRECISA VERIFICAR O BACKEND!
-                    const dataHoraCell = row.insertCell();
-                    dataHoraCell.textContent = `${agendamento.data || 'N/A'} às ${agendamento.hora || 'N/A'}`;
-
-
-                    // Coluna 4: Procedimentos (Nomes) - Agora vem diretamente do backend
-                    row.insertCell().textContent = agendamento.procedimentosNomes || 'N/A';
-
-                    // Coluna 5: Valor Total
-                    // O backend já deve ter calculado o valor total
-                    row.insertCell().textContent = `R$ ${parseFloat(agendamento.valorTotal || 0).toFixed(2).replace('.', ',')}`;
-
-                    // Coluna 6: Status
-                    row.insertCell().textContent = agendamento.status ? (agendamento.status.charAt(0).toUpperCase() + agendamento.status.slice(1)) : 'N/A';
-
-                    // Coluna 7: Observações
-                    row.insertCell().textContent = agendamento.observacoes || 'N/A';
-
-                    // Coluna 8: Ações (Botões)
-                    const actionsCell = row.insertCell();
-                    actionsCell.classList.add('actions');
-
-                    // Botão de Editar
-                    const editButton = document.createElement('a');
-                    editButton.href = `agendamentos_editar.html?id=${agendamento._id}`;
-                    editButton.textContent = 'Editar';
-                    editButton.classList.add('module-button', 'edit-button');
-                    actionsCell.appendChild(editButton);
-
-                    // Botão de Excluir
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Excluir';
-                    deleteButton.classList.add('module-button', 'delete-button');
-                    deleteButton.onclick = () => deleteAgendamento(agendamento._id, row);
-                    actionsCell.appendChild(deleteButton);
-
-                    // Botão de Confirmar (visível apenas se o status for "pendente")
-                    if (agendamento.status && agendamento.status.toLowerCase() === 'pendente') {
-                        const confirmBtn = document.createElement('button');
-                        confirmBtn.textContent = 'Confirmar';
-                        confirmBtn.classList.add('module-button', 'confirm-button');
-                        confirmBtn.onclick = () => confirmAgendamento(agendamento._id);
-                        actionsCell.appendChild(confirmBtn);
-                    }
-                });
+                const users = await response.json();
+                console.log('Usuários recebidos:', users); // Para depuração
+                displayUsers(users);
             } catch (error) {
-                console.error('Erro ao carregar agendamentos:', error);
-                showMessage('Erro ao carregar a lista de agendamentos. Verifique o console para mais detalhes.', 'error');
-                agendamentosTableBody.innerHTML = '<tr><td colspan="8">Erro ao carregar agendamentos.</td></tr>';
-            }
-        }
-
-        async function deleteAgendamento(id, row) {
-            if (confirm("Tem certeza que deseja excluir este agendamento?")) {
-                try {
-                    const response = await fetch(`http://localhost:3001/api/agendamentos/${id}`, {
-                        method: 'DELETE',
-                    });
-                    
-                    // Para DELETE, o status 204 (No Content) é comum e não retorna JSON
-                    if (response.status === 204 || response.ok) {
-                        showMessage('Agendamento excluído com sucesso!', 'success');
-                        
-                        // Remove a linha da tabela imediatamente com animação
-                        row.classList.add('removing');
-                        setTimeout(() => {
-                            if (row.parentNode) {
-                                row.parentNode.removeChild(row);
-                            }
-                            // Verifica se ainda há linhas na tabela
-                            const remainingRows = agendamentosTableBody.querySelectorAll('tr:not(.removing)');
-                            if (remainingRows.length === 0) {
-                                agendamentosTableBody.innerHTML = '<tr><td colspan="8">Nenhum agendamento encontrado.</td></tr>';
-                            }
-                        }, 500); // Tempo da animação CSS
-                        
-                    } else {
-                        const data = await response.json(); // Tenta ler JSON para mensagens de erro
-                        showMessage(data.message || 'Erro desconhecido ao excluir agendamento.', 'error');
-                    }
-                } catch (error) {
-                    console.error('Erro ao excluir agendamento:', error);
-                    showMessage('Erro de conexão ou servidor ao excluir agendamento.', 'error');
+                console.error('Falha ao buscar usuários:', error);
+                const userListContainer = document.getElementById('userListContainer');
+                if (userListContainer) {
+                    userListContainer.innerHTML = `<p class="message error">Erro ao carregar os usuários: ${error.message}. Por favor, tente novamente mais tarde.</p>`;
                 }
+            } finally {
+                if (loadingMessage) loadingMessage.style.display = 'none';
             }
         }
 
-        async function confirmAgendamento(id) {
-            if (!confirm('Tem certeza que deseja CONFIRMAR este agendamento? Ele será registrado como receita.')) {
+        function displayUsers(users) {
+            const usersTableBody = document.getElementById('usersTableBody');
+            if (!usersTableBody) {
+                console.error("Elemento 'usersTableBody' não encontrado.");
                 return;
             }
-            try {
-                const response = await fetch(`http://localhost:3001/api/agendamentos/${id}/confirmar`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({})
-                });
 
-                const data = await response.json();
-                if (response.ok) {
-                    showMessage(data.message, 'success');
-                    loadAgendamentos();
-                } else {
-                    showMessage(data.message || 'Erro ao confirmar agendamento.', 'error');
-                }
-            } catch (error) {
-                console.error('Erro ao confirmar agendamento:', error);
-                showMessage('Erro de conexão ou servidor ao atualizar agendamento.', 'error');
+            usersTableBody.innerHTML = ''; // Limpa qualquer conteúdo anterior
+
+            if (users.length === 0) {
+                usersTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Nenhum usuário cadastrado.</td></tr>';
+                return;
             }
+
+            users.forEach(user => {
+                const row = usersTableBody.insertRow();
+                const usernameCell = row.insertCell();
+                const emailCell = row.insertCell();
+                const actionsCell = row.insertCell(); // Célula para botões de ação
+
+                usernameCell.textContent = user.username;
+                emailCell.textContent = user.email;
+
+                // Botões de Ação (Exemplo: para futuras funcionalidades de editar/excluir)
+                actionsCell.classList.add('actions'); // Adiciona classe para estilização
+                actionsCell.innerHTML = `
+                    <button class="action-btn" onclick="editUser('${user.username}')">Editar</button>
+                    <button class="action-btn delete" onclick="deleteUser('${user.username}')">Excluir</button>
+                `;
+            });
         }
 
-        // Carrega os agendamentos quando a página é carregada
-        loadAgendamentos();
+        // Funções de exemplo para os botões (você precisaria implementar o backend e o modal para elas)
+        function openRegistrationModal() {
+            alert('Funcionalidade de Cadastrar Novo Usuário (modal ou nova página) será implementada aqui.');
+            // Exemplo de como abrir um modal (o modal HTML está em display:none):
+            // document.getElementById('registrationModal').style.display = 'flex';
+        }
+
+        function closeRegistrationModal() {
+            // document.getElementById('registrationModal').style.display = 'none';
+        }
+
+        function refreshUserList() {
+            fetchUsers();
+            alert('Lista de usuários atualizada!');
+        }
+
+        function editUser(username) {
+            alert(`Editar usuário: ${username}. (Funcionalidade a ser implementada)`);
+            // Aqui você chamaria um modal de edição ou navegaria para uma página de edição
+        }
+
+        function deleteUser(username) {
+            if (confirm(`Tem certeza que deseja excluir o usuário "${username}"?`)) {
+                alert(`Excluir usuário: ${username}. (Funcionalidade a ser implementada no backend e no frontend)`);
+                // Implementar chamada DELETE para o backend e depois atualizar a lista
+                // Exemplo: await fetch(`/api/users/${username}`, { method: 'DELETE' });
+            }
+        }
     </script>
 </body>
 </html>

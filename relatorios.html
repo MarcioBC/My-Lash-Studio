@@ -6,56 +6,177 @@
     <title>Relatórios de Agendamentos</title>
     
     <style>
+        /* Estilos gerais para o corpo - COPIADO DO DASHBOARD.HTML */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f4f7f6; /* Fundo mais suave */
+            padding: 0;
+            background-color: #f4f7f6;
             color: #333;
             line-height: 1.6;
+            min-height: 100vh; /* Garante que o corpo ocupe toda a altura da viewport */
+            display: flex;
+            flex-direction: column; /* Para que o footer fixe embaixo */
         }
 
+        /* Estilos para o cabeçalho (onde o menu ficará) - COPIADO DO DASHBOARD.HTML */
+        header {
+            background-color: #2c3e50; /* Cor de fundo escura para o cabeçalho */
+            color: white;
+            padding: 15px 30px; /* Ajustado para 30px nas laterais para melhor espaçamento */
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Sombra mais suave */
+            display: flex;
+            justify-content: space-between; /* Espaço entre o título e o menu */
+            align-items: center; /* Alinha verticalmente */
+            flex-wrap: wrap; /* Permite quebra de linha em telas menores */
+            position: sticky; /* Menu fixo no topo ao rolar */
+            top: 0;
+            z-index: 1000; /* Garante que fique acima de outros elementos */
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 26px; /* Ajustado para um tamanho consistente */
+            font-weight: 600;
+            color: #ffbbcd;
+        }
+
+        /* Estilos para a navegação (o menu em si) - COPIADO DO DASHBOARD.HTML */
+        nav {
+            flex-grow: 1; /* Permite que a navegação ocupe espaço para empurrar os itens à direita */
+            text-align: right; /* Alinha o texto do nav para a direita */
+            margin-left: 20px; /* Espaço entre o título e o menu */
+        }
+
+        nav ul {
+            list-style: none; /* Remove os pontinhos da lista */
+            margin: 0;
+            padding: 0;
+            display: inline-flex; /* Para que a lista se ajuste ao conteúdo e vá para a direita */
+            flex-wrap: wrap;
+        }
+
+        /* Adicionado position: relative para os LIs que contêm submenu - COPIADO DO DASHBOARD.HTML */
+        nav ul li {
+            position: relative;
+            margin: 0 18px; /* Espaçamento ajustado */
+        }
+
+        /* Estilos para links do menu pai - COPIADO DO DASHBOARD.HTML */
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 0; /* Mais padding para links clicáveis */
+            transition: color 0.3s ease, transform 0.2s ease;
+            position: relative; /* Para o efeito de sublinhado */
+            display: block; /* Para que o padding e a largura do hover funcionem */
+        }
+
+        /* Efeito de sublinhado animado para links - COPIADO DO DASHBOARD.HTML */
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #ffbbcd;
+            transition: width 0.3s ease;
+        }
+
+        nav ul li a:hover::after,
+        nav ul li a.active::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            color: #ffbbcd;
+            transform: translateY(-2px); /* Pequeno efeito de levantamento */
+        }
+
+        /* Estilos para o SUBMENU - COPIADO DO DASHBOARD.HTML */
+        .submenu {
+            display: none; /* Esconde o submenu por padrão */
+            position: absolute;
+            background-color: #3b506b; /* Cor de fundo do submenu */
+            min-width: 180px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            padding: 10px 0;
+            border-radius: 5px;
+            left: 50%; /* Centraliza o submenu sob o item pai */
+            transform: translateX(-50%);
+            top: 100%; /* Posiciona abaixo do item pai */
+            white-space: nowrap; /* Evita quebra de linha nos itens do submenu */
+        }
+
+        .submenu li {
+            margin: 0; /* Remove margem dos itens do submenu */
+        }
+
+        .submenu li a {
+            color: white;
+            padding: 12px 15px; /* Padding para itens do submenu */
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.2s ease;
+        }
+
+        /* CORRIGIDO: Cor de hover dos submenus para #ffccbd - COPIADO DO DASHBOARD.HTML */
+        .submenu li a:hover {
+            background-color: #ffccbd; /* Nova cor de destaque no hover do submenu */
+            color: #2c3e50; /* Cor do texto no hover para contraste */
+        }
+
+        /* Mostrar o submenu ao passar o mouse sobre o LI PAI - COPIADO DO DASHBOARD.HTML */
+        nav ul li:hover > .submenu {
+            display: block;
+        }
+
+        /* Estilos para o botão de Logout - COPIADO DO DASHBOARD.HTML */
+        .logout-btn {
+            background-color: #dc3545; /* Vermelho */
+            color: white;
+            padding: 10px 20px; /* Padding maior */
+            border: none;
+            border-radius: 6px; /* Bordas mais suaves */
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-left: 25px; /* Espaçamento do menu */
+            flex-shrink: 0;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333; /* Vermelho mais escuro no hover */
+            transform: translateY(-2px);
+        }
+
+        /* Estilos do Container Principal - MANTIDO DO RELATORIOS.HTML */
         .container {
-            max-width: 1000px; /* Aumentado para melhor visualização da tabela */
-            margin: 30px auto; /* Mais espaçamento superior */
+            max-width: 1000px;
+            margin: 30px auto;
             padding: 30px;
             background-color: #ffffff;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra mais suave */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        h1 {
-            color: #2c3e50;
+        /* Título principal do relatório (NÃO o do header) - AJUSTADO DO RELATORIOS.HTML */
+        .container h1 {
+            color: black; /* Cor solicitada */
+            font-size: 24px; /* Tamanho da fonte solicitado */
             text-align: center;
-            margin-bottom: 20px; /* Reduzida para o botão de voltar */
-            font-size: 2.2em;
+            margin-top: 0; /* Ajustado para ficar abaixo da nova navbar */
+            margin-bottom: 30px; /* Espaçamento abaixo do título */
+            font-weight: 600;
         }
         
-        /* Estilo para o botão Voltar ao Dashboard */
-        .back-to-dashboard-btn {
-            display: block; /* Ocupa a própria linha */
-            width: fit-content; /* Largura se ajusta ao conteúdo */
-            margin: -10px auto 30px auto; /* Centraliza e ajusta margens */
-            background-color: #5b6a7a; /* Um cinza mais neutro para o botão de voltar */
-            padding: 10px 20px;
-            text-decoration: none; /* Remove sublinhado se for um link */
-            color: white;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            font-size: 1em;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .back-to-dashboard-btn:hover {
-            background-color: #4a5764;
-            transform: translateY(-1px);
-        }
-
-        .back-to-dashboard-btn:active {
-            transform: translateY(0);
-        }
-
-
+        /* h2 mantido do seu código original, para outros títulos se houver */
         h2 {
             color: #34495e;
             margin-top: 30px;
@@ -65,29 +186,29 @@
             padding-bottom: 10px;
         }
 
-        /* Estilo para a barra de controles e botões */
+        /* Estilo para a barra de controles e botões - MANTIDO DO RELATORIOS.HTML */
         .controls {
             display: flex;
-            flex-wrap: wrap; /* Permite que os itens quebrem linha */
-            gap: 15px; /* Espaçamento entre os itens */
+            flex-wrap: wrap;
+            gap: 15px;
             margin-bottom: 30px;
-            align-items: flex-end; /* Alinha os itens pela base (útil para input+label) */
-            justify-content: center; /* Centraliza os itens */
+            align-items: flex-end;
+            justify-content: center;
         }
 
-        /* Grupo para label e input de data */
+        /* Grupo para label e input de data - MANTIDO DO RELATORIOS.HTML */
         .date-control-group {
             display: flex;
-            flex-direction: column; /* Label acima do input */
+            flex-direction: column;
             align-items: flex-start;
-            gap: 5px; /* Espaço entre label e input */
+            gap: 5px;
         }
 
         .controls label {
             font-weight: bold;
             color: #555;
-            font-size: 0.95em; /* Ligeiramente menor para um visual mais limpo */
-            margin-bottom: 0; /* Remove margem padrão */
+            font-size: 0.95em;
+            margin-bottom: 0;
         }
 
         .controls input[type="date"] {
@@ -96,7 +217,7 @@
             border-radius: 5px;
             font-size: 1em;
             outline: none;
-            width: 170px; /* Largura fixa para o input de data */
+            width: 170px;
         }
 
         .controls input[type="date"]:focus {
@@ -104,62 +225,62 @@
             box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
         }
 
-        /* Estilo para TODOS os botões - Garante tamanho uniforme */
-        button {
-            background-color: #3498db; /* Azul vibrante */
-            color: white;
-            padding: 12px 18px; /* Padding ajustado para uniformidade */
+        /* PADRONIZAÇÃO DOS BOTÕES NO GRUPO DE CONTROLES (Demais botões) - MANTIDO DO RELATORIOS.HTML */
+        .controls button {
+            background-color: #ffbbcd;
+            color: black;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1em; /* Tamanho da fonte uniforme */
             transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para botões */
-            min-width: 160px; /* Largura MÍNIMA para uniformizar os botões */
-            text-align: center; /* Centraliza o texto */
-            flex-grow: 1; /* Permite que os botões cresçam se necessário, mas min-width define o base */
-            flex-basis: auto; /* Permite que o flexbox decida a largura inicial */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            
+            width: 190px;
+            height: 45px;
+            font-size: 14px;
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            white-space: nowrap;
+            padding: 0 10px;
         }
         
-        /* Ajuste específico para os botões do tipo de agendamento se eles forem muito longos */
-        #btnPendentes, #btnConfirmados, #btnCancelados {
-            min-width: 200px; /* Um pouco mais largo para acomodar o texto */
+        .controls button:hover {
+            background-color: #da869c;
+            transform: translateY(-2px);
         }
 
-
-        button:hover {
-            background-color: #2980b9; /* Azul mais escuro no hover */
-            transform: translateY(-2px); /* Pequeno efeito de elevação */
-        }
-
-        button:active {
+        .controls button:active {
             background-color: #2471a3;
             transform: translateY(0);
         }
 
-        /* Estilo para a área de conteúdo do relatório */
+        /* Estilo para a área de conteúdo do relatório - MANTIDO DO RELATORIOS.HTML */
         #relatorioContent {
             background-color: #fdfdfd;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             padding: 25px;
-            min-height: 150px; /* Altura mínima para visualização */
+            min-height: 150px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* Alinha conteúdo ao topo */
-            align-items: flex-start; /* Alinha conteúdo à esquerda */
-            overflow-x: auto; /* Permite scroll horizontal para tabelas grandes */
+            justify-content: flex-start;
+            align-items: flex-start;
+            overflow-x: auto;
+            margin-bottom: 40px;
         }
 
         .no-data-message {
             color: #888;
             font-style: italic;
             text-align: center;
-            width: 100%; /* Centraliza a mensagem */
+            width: 100%;
             margin-top: 20px;
         }
 
-        /* Estilo da Tabela */
+        /* Estilo da Tabela - MANTIDO DO RELATORIOS.HTML */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -169,12 +290,12 @@
 
         th, td {
             border: 1px solid #ddd;
-            padding: 12px 15px; /* Mais padding para células */
+            padding: 12px 15px;
             text-align: left;
         }
 
         th {
-            background-color: #eef4f7; /* Fundo para o cabeçalho da tabela */
+            background-color: #eef4f7;
             color: #444;
             font-weight: bold;
             text-transform: uppercase;
@@ -182,71 +303,176 @@
         }
 
         tr:nth-child(even) {
-            background-color: #f9f9f9; /* Linhas zebradas */
+            background-color: #f9f9f9;
         }
 
         tr:hover {
-            background-color: #f1f1f1; /* Efeito hover nas linhas */
+            background-color: #f1f1f1;
         }
 
-        /* Estilo para mensagens de erro */
+        /* Estilo para mensagens de erro - MANTIDO DO RELATORIOS.HTML */
         .error-message {
             color: red;
             font-weight: bold;
         }
 
-        /* Media Queries para Responsividade */
-        @media (max-width: 900px) { /* Ajuste o breakpoint para mais itens */
-            .controls {
-                justify-content: flex-start; /* Alinha à esquerda em telas menores */
-            }
-            button {
-                min-width: unset; /* Remove min-width para maior flexibilidade */
-                width: 100%; /* Botões ocupam largura total em telas menores */
-                flex-basis: auto; /* Deixa o flexbox decidir */
-            }
-             #btnPendentes, #btnConfirmados, #btnCancelados {
-                min-width: unset; /* Também remove */
-            }
-            .date-control-group {
-                width: 100%; /* O grupo de data ocupa a largura total */
-            }
-            .controls input[type="date"] {
-                width: 100%; /* Input de data ocupa largura total */
-                max-width: unset; /* Remove max-width */
-            }
-            .back-to-dashboard-btn {
-                width: 100%; /* Ocupa largura total em telas menores */
-                text-align: center;
-            }
+        /* Estilos para o rodapé - COPIADO DO DASHBOARD.HTML */
+        footer {
+            margin-top: auto; /* Empurra o rodapé para baixo */
+            padding: 20px;
+            text-align: center;
+            color: #777;
+            font-size: 0.9em;
+            background-color: #eef2f5; /* Fundo suave para o rodapé */
+            border-top: 1px solid #e0e0e0;
         }
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
+
+        /* Responsividade para telas menores - COMBINADO DO DASHBOARD.HTML E RELATORIOS.HTML */
+        @media (max-width: 900px) {
+            header { /* COPIADO DO DASHBOARD.HTML */
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px 20px;
+            }
+            header h1 { /* COPIADO DO DASHBOARD.HTML */
+                margin-bottom: 10px;
+                text-align: center;
+                width: 100%;
+            }
+            nav { /* COPIADO DO DASHBOARD.HTML */
+                width: 100%;
+                margin-left: 0;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            nav ul { /* COPIADO DO DASHBOARD.HTML */
+                flex-direction: column;
+                align-items: center;
+                display: flex;
+                width: 100%;
+            }
+            nav ul li { /* COPIADO DO DASHBOARD.HTML */
+                margin: 5px 0;
+            }
+            .logout-btn { /* COPIADO DO DASHBOARD.HTML */
+                margin-left: 0;
+                width: 100%;
+                text-align: center;
+                padding: 12px;
             }
 
-            .container {
-                padding: 15px;
+            .controls { /* MANTIDO DO RELATORIOS.HTML */
+                justify-content: flex-start;
             }
-
-            button {
-                font-size: 0.9em; /* Ajusta fonte para telas menores */
+            .controls button { /* MANTIDO DO RELATORIOS.HTML */
+                width: 100%;
+                max-width: unset;
+                flex-basis: auto;
+                height: 40px;
+                font-size: 13px;
+            }
+            .date-control-group { /* MANTIDO DO RELATORIOS.HTML */
+                width: 100%;
+            }
+            .controls input[type="date"] { /* MANTIDO DO RELATORIOS.HTML */
+                width: 100%;
+                max-width: unset;
+            }
+            .btn-bottom-dashboard { /* MANTIDO DO RELATORIOS.HTML */
+                width: 100%;
+                text-align: center;
+                font-size: 14px;
                 padding: 10px 15px;
             }
 
+            /* Submenu em telas menores - COPIADO DO DASHBOARD.HTML */
+            .submenu {
+                position: static;
+                display: block !important;
+                width: 100%;
+                box-shadow: none;
+                padding: 0;
+                border-radius: 0;
+                background-color: #3b506b;
+            }
+            .submenu li a {
+                padding: 8px 30px;
+                background-color: rgba(0,0,0,0.1);
+            }
+            .submenu li a:hover {
+                background-color: #ffccbd;
+                color: #2c3e50;
+            }
+        }
+        @media (max-width: 768px) {
+            /* Regras específicas para telas menores que 768px do relatorios.html, se existirem */
+            .container {
+                padding: 15px;
+            }
+            .container h1 { /* Para o título do relatório, não do header */
+                font-size: 20px;
+            }
             th, td {
                 padding: 8px 10px;
                 font-size: 0.8em;
             }
         }
+        @media (max-width: 500px) { /* COPIADO DO DASHBOARD.HTML */
+            .dashboard-content {
+                padding: 15px;
+            }
+            .dashboard-content h2 {
+                font-size: 1.8em;
+            }
+            /* Removido estilos de card e tabela do dashboard, pois não se aplicam ao relatorios.html */
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Relatórios de Agendamentos</h1>
-        
-        <a href="dashboard.html" class="back-to-dashboard-btn">Voltar ao Dashboard</a>
+    <header>
+        <h1>Studio JéMarqui</h1>
+        <nav>
+            <ul>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Clientes</a>
+                    <ul class="submenu">
+                        <li><a href="clientes.html">Cadastrar Clientes</a></li>
+                        <li><a href="consultar_clientes.html">Consultar Clientes</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Agendamentos</a>
+                    <ul class="submenu">
+                        <li><a href="agendamentos.html">Novo Agendamento</a></li>
+                        <li><a href="agendamentos_lista.html">Lista de Agendamentos</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Transações</a>
+                    <ul class="submenu">
+                        <li><a href="transacoes.html">Livro Caixa</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Usuários</a>
+                    <ul class="submenu">
+                        <li><a href="usuarios.html">Gerenciar Usuários</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Relatórios</a>
+                    <ul class="submenu">
+                        <li><a href="relatorios.html">Visualizar Relatórios</a></li>
+                    </ul>
+                </li>
+                <li><button class="logout-btn" onclick="logout()">Sair</button></li>
+            </ul>
+        </nav>
+    </header>
 
+    <div class="container">
+        <h1 class="relatorios-title">Relatórios de agendamentos</h1>
+        
         <div class="controls">
             <button id="btnPendentes">Agendamentos Pendentes</button>
             <button id="btnConfirmados">Agendamentos Confirmados</button>
@@ -267,6 +493,33 @@
         </div>
     </div>
 
+    <footer>
+        <p>&copy; 2024 Meu Estúdio. Todos os direitos reservados.</p>
+    </footer>
+
     <script src="relatorios.js"></script>
+
+    <script>
+        // Funções JavaScript COPIADAS DO DASHBOARD.HTML
+        function toggleSubmenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (window.innerWidth <= 900) {
+                    submenu.style.display = (submenu.style.display === 'block' || submenu.style.display === '') ? 'none' : 'block';
+                }
+            }
+        }
+
+        function logout() {
+            alert('Você foi desconectado!');
+            window.location.href = 'login.html';
+        }
+
+        // Funções para carregar dados do relatório (relatorios.js) seriam chamadas aqui
+        // Exemplo:
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     // Seu código JavaScript de relatorios.js viria aqui
+        // });
+    </script>
 </body>
 </html>

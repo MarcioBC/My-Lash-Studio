@@ -134,6 +134,19 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// Rota para obter todos os usuários (necessário para o frontend)
+app.get('/api/users', async (req, res) => {
+    try {
+        const users = await readJsonFile(USERS_FILE); // Use a função async/await para ler o arquivo
+        // Opcional: Remova senhas antes de enviar (boa prática de segurança)
+        const usersWithoutPasswords = users.map(({ password, ...rest }) => rest);
+        res.json(usersWithoutPasswords);
+    } catch (error) {
+        console.error('Erro na rota GET /api/users:', error);
+        res.status(500).json({ message: 'Erro ao carregar os usuários.' });
+    }
+});
+
 // --- Rotas de Clientes (CRUD) - AGORA USANDO ASYNC/AWAIT E VALIDAÇÃO DE CELULAR ---
 
 app.get('/api/clients', async (req, res) => {
@@ -225,11 +238,59 @@ app.delete('/api/clients/:id', async (req, res) => { // Tornar a rota async
     }
 });
 
-// --- Rotas de Agendamentos (CRUD) - AGORA USANDO ASYNC/AWAIT NAS FUNÇÕES DE ARQUIVO ---
+// --- Rotas de Agendamentos (CRUD) - AGORA COM ENRIQUECIMENTO DE DADOS PARA O FRONTEND ---
 app.get('/api/agendamentos', async (req, res) => {
     try {
         const agendamentos = await readJsonFile(AGENDAMENTOS_FILE);
-        res.json(agendamentos);
+        const clientes = await readJsonFile(CLIENTES_FILE);
+        const procedures = await readJsonFile(PROCEDURES_FILE); // Carrega os procedimentos
+
+        const agendamentosFormatados = agendamentos.map(agendamento => {
+            // Encontrar o cliente pelo clientId
+            const cliente = clientes.find(c => String(c._id) === String(agendamento.clientId));
+            const clienteNome = cliente ? cliente.name : 'Cliente Desconhecido';
+
+            // Mapear os procedimentos e juntar os nomes em uma string
+            // Verifica se agendamento.procedimentos existe e é um array
+            const procedimentosNomes = (agendamento.procedimentos && Array.isArray(agendamento.procedimentos) && agendamento.procedimentos.length > 0) ?
+                agendamento.procedimentos
+                    .map(procAgendado => {
+                        // Se o procedimento no agendamento já tiver um 'nome', use-o.
+                        // Caso contrário, tente encontrar o nome na lista mestra de procedures pelo 'id'
+                        const procedimentoOriginal = procedures.find(p => String(p._id) === String(procAgendado.id));
+                        return procAgendado.nome || (procedimentoOriginal ? procedimentoOriginal.nome : 'Procedimento Desconhecido');
+                    })
+                    .join(', ')
+                : 'N/A'; // Se não houver procedimentos ou o array estiver vazio
+
+            // Usa 'agendamento.data' e 'agendamento.hora' diretamente
+            let dataFormatada = 'N/A';
+            let horaFormatada = 'N/A';
+
+            if (agendamento.data) {
+                const dateObj = new Date(agendamento.data);
+                if (!isNaN(dateObj.getTime())) {
+                    dataFormatada = dateObj.toLocaleDateString('pt-BR');
+                }
+            }
+
+            if (agendamento.hora) {
+                 horaFormatada = agendamento.hora; // Use a hora como ela está no JSON
+            }
+
+
+            // Retorne o agendamento original, mas adicione as novas propriedades e garanta o formato correto
+            return {
+                ...agendamento, // Mantém todas as propriedades originais do agendamento
+                clienteNome: clienteNome,
+                procedimentosNomes: procedimentosNomes,
+                data: dataFormatada, // Garante que a data está formatada
+                hora: horaFormatada, // Garante que a hora está presente
+                valorTotal: parseFloat(agendamento.valorTotal || 0) // Garante que valorTotal é um número
+            };
+        });
+
+        res.json(agendamentosFormatados);
     } catch (error) {
         console.error('Erro na rota GET /api/agendamentos:', error);
         res.status(500).json({ message: 'Erro ao carregar os agendamentos.' });
@@ -238,6 +299,12 @@ app.get('/api/agendamentos', async (req, res) => {
 
 app.post('/api/agendamentos', async (req, res) => {
     const novoAgendamento = req.body;
+
+    // *** Validação explícita para data e hora ***
+    if (!novoAgendamento.data || !novoAgendamento.hora) {
+        return res.status(400).json({ message: 'Data e hora do agendamento são obrigatórios.' });
+    }
+
     try {
         let agendamentos = await readJsonFile(AGENDAMENTOS_FILE);
 
@@ -245,15 +312,12 @@ app.post('/api/agendamentos', async (req, res) => {
         novoAgendamento._id = String(lastId + 1);
         novoAgendamento.status = "pendente"; // Define o status inicial como pendente
 
-        // Garante que os novos agendamentos usem 'data' e 'hora'
-        if (novoAgendamento.date && !novoAgendamento.data) {
-            novoAgendamento.data = novoAgendamento.date;
-            delete novoAgendamento.date; // Remove a propriedade antiga
-        }
-        if (novoAgendamento.time && !novoAgendamento.hora) {
-            novoAgendamento.hora = novoAgendamento.time;
-            delete novoAgendamento.time; // Remove a propriedade antiga
-        }
+        // Garante que o agendamento seja salvo com 'data' e 'hora' separadas.
+        // Remova quaisquer propriedades 'date', 'time' ou 'dataHora' se por acaso o frontend ainda as enviasse.
+        delete novoAgendamento.date;
+        delete novoAgendamento.time;
+        delete novoAgendamento.dataHora;
+
 
         agendamentos.push(novoAgendamento);
 
@@ -292,19 +356,15 @@ app.put('/api/agendamentos/:id', async (req, res) => {
             return res.status(404).send('Agendamento não encontrado.');
         }
 
-        // Garante que as atualizações usem 'data' e 'hora'
-        if (updatedAgendamentoData.date && !updatedAgendamentoData.data) {
-            updatedAgendamentoData.data = updatedAgendamentoData.date;
-            delete updatedAgendamentoData.date;
-        }
-        if (updatedAgendamentoData.time && !updatedAgendamentoData.hora) {
-            updatedAgendamentoData.hora = updatedAgendamentoData.time;
-            delete updatedAgendamentoData.time;
-        }
+        // Remove quaisquer propriedades 'date', 'time' ou 'dataHora' se por acaso o frontend ainda as enviasse
+        // para garantir que apenas 'data' e 'hora' sejam os campos de data/hora
+        delete updatedAgendamentoData.date;
+        delete updatedAgendamentoData.time;
+        delete updatedAgendamentoData.dataHora;
 
         agendamentos[agendamentoIndex] = {
             ...agendamentos[agendamentoIndex],
-            ...updatedAgendamentoData,
+            ...updatedAgendamentoData, // Agora updatedAgendamentoData deve conter 'data' e 'hora' se forem enviados
             _id: agendamentoIdToUpdate
         };
         await writeJsonFile(AGENDAMENTOS_FILE, agendamentos);
@@ -343,16 +403,24 @@ app.put('/api/agendamentos/:id/confirmar', async (req, res) => {
         // Lógica para criar a transação de receita
         let transacoes = await readJsonFile(TRANSACOES_FILE);
         let clientes = await readJsonFile(CLIENTES_FILE);
+        let procedures = await readJsonFile(PROCEDURES_FILE); // Carrega os procedimentos para a descrição
 
         const cliente = clientes.find(c => String(c._id) === String(agendamento.clientId));
         const clienteNome = cliente ? cliente.name : 'Cliente Removido';
 
         const procedimentosNomes = (agendamento.procedimentos && Array.isArray(agendamento.procedimentos) && agendamento.procedimentos.length > 0) ?
-            agendamento.procedimentos.map(p => p.nome || p.name || 'Procedimento').join(', ') : '';
+            agendamento.procedimentos
+                .map(procAgendado => {
+                    const procedimentoOriginal = procedures.find(p => String(p._id) === String(procAgendado.id));
+                    return procAgendado.nome || (procedimentoOriginal ? procedimentoOriginal.nome : 'Procedimento Desconhecido');
+                })
+                .join(', ')
+            : '';
+
         let descricaoTransacao = `Agendamento - ${clienteNome}${procedimentosNomes ? ` (${procedimentosNomes})` : ''}`;
 
-        // Garante que a transação use 'data'
-        const transacaoData = (agendamento.data || agendamento.date) ? new Date(agendamento.data || agendamento.date).toISOString().split('T')[0] : 'N/A'; // Formato YYYY-MM-DD
+        // Usa a data do agendamento diretamente, já no formato 'AAAA-MM-DD' esperado
+        const transacaoData = agendamento.data;
 
 
         const novaTransacao = {
@@ -360,7 +428,7 @@ app.put('/api/agendamentos/:id/confirmar', async (req, res) => {
             tipo: 'receita',
             descricao: descricaoTransacao,
             valor: parseFloat(agendamento.valorTotal || 0), // Garante que é um número
-            data: transacaoData, // Usa a data normalizada
+            data: transacaoData, // Usa a data do agendamento
             origem: 'agendamento',
             origemId: agendamentoId
         };
@@ -441,17 +509,26 @@ app.get('/api/relatorios/status/:status', async (req, res) => {
                 };
             });
 
-            // Normaliza 'data' e 'hora' a partir de 'data'/'date' e 'hora'/'time'
-            const dataOriginal = agendamento.data || agendamento.date;
-            const horaOriginal = agendamento.hora || agendamento.time;
+            // Usa 'agendamento.data' e 'agendamento.hora' diretamente
+            let dataFormatada = 'N/A';
+            let horaFormatada = 'N/A';
 
-            const dataFormatada = dataOriginal ? new Date(dataOriginal).toLocaleDateString('pt-BR') : 'N/A';
-            const horaFormatada = horaOriginal || 'N/A';
+            if (agendamento.data) {
+                const dateObj = new Date(agendamento.data);
+                if (!isNaN(dateObj.getTime())) {
+                    dataFormatada = dateObj.toLocaleDateString('pt-BR');
+                }
+            }
+            if (agendamento.hora) {
+                horaFormatada = agendamento.hora;
+            }
+
 
             return {
                 ...agendamento, // Mantém todas as propriedades originais
                 clienteNome: clienteNome,
                 procedimentos: procedimentosDetalhes,
+                procedimentosNomes: procedimentosDetalhes.map(p => p.nome).join(', '), // Adicionado para o frontend
                 data: dataFormatada, // Usa a data normalizada e formatada
                 hora: horaFormatada, // Usa a hora normalizada
                 valorTotal: parseFloat(agendamento.valorTotal || 0) // Garante que valorTotal é um número
@@ -557,9 +634,9 @@ app.get('/api/relatorios/agendamentos/:period', async (req, res) => {
         let filteredAgendamentos = [];
 
         agendamentos.forEach(agendamento => {
-            const agendamentoDateStr = agendamento.data || agendamento.date;
+            const agendamentoDateStr = agendamento.data; // Agora só esperamos 'data'
             if (!agendamentoDateStr) {
-                console.warn(`Agendamento sem data/date ignorado: ${JSON.stringify(agendamento)}`);
+                console.warn(`Agendamento sem data ignorado: ${JSON.stringify(agendamento)}`);
                 return;
             }
             const agendamentoDate = new Date(agendamentoDateStr);
@@ -605,16 +682,26 @@ app.get('/api/relatorios/agendamentos/:period', async (req, res) => {
                 };
             });
 
-            const dataOriginal = agendamento.data || agendamento.date;
-            const horaOriginal = agendamento.hora || agendamento.time;
+            // Usa 'agendamento.data' e 'agendamento.hora' diretamente
+            let dataFormatada = 'N/A';
+            let horaFormatada = 'N/A';
 
-            const dataFormatada = dataOriginal ? new Date(dataOriginal).toLocaleDateString('pt-BR') : 'N/A';
-            const horaFormatada = horaOriginal || 'N/A';
+            if (agendamento.data) {
+                const dateObj = new Date(agendamento.data);
+                if (!isNaN(dateObj.getTime())) {
+                    dataFormatada = dateObj.toLocaleDateString('pt-BR');
+                }
+            }
+            if (agendamento.hora) {
+                horaFormatada = agendamento.hora;
+            }
+
 
             return {
                 ...agendamento,
                 clienteNome: clienteNome,
                 procedimentos: procedimentosDetalhes,
+                procedimentosNomes: procedimentosDetalhes.map(p => p.nome).join(', '), // Adicionado para o frontend
                 data: dataFormatada,
                 hora: horaFormatada,
                 valorTotal: parseFloat(agendamento.valorTotal || 0)
@@ -661,62 +748,7 @@ app.get('/api/procedures', async (req, res) => {
     }
 });
 
-
-// Rota para buscar clientes (para a tela de edição, dropdown de clientes)
-app.get('/api/clients-dropdown', async (req, res) => {
-    try {
-        const clientes = await readJsonFile(CLIENTES_FILE);
-        // Retorna apenas o _id e o nome para o dropdown, otimizando a resposta
-        res.json(clientes.map(c => ({ _id: c._id, name: c.name })));
-    } catch (error) {
-        console.error('Erro na rota GET /api/clients-dropdown:', error);
-        res.status(500).json({ message: 'Erro ao carregar clientes para dropdown.' });
-    }
-});
-
-
-// Rota para relatórios (Exemplo: Total de receitas e despesas por período)
-app.get('/api/reports/financial', async (req, res) => {
-    const { period } = req.query; // 'day', 'week', 'month', 'total'
-    try {
-        const transacoes = await readJsonFile(TRANSACOES_FILE);
-        const now = new Date();
-        let receitas = 0;
-        let despesas = 0;
-
-        transacoes.forEach(transacao => {
-            const transacaoDate = new Date(transacao.data); // Assumindo que transacao.data é um formato de data válido
-
-            let includeTransaction = false;
-            if (period === 'day' && isSameDay(transacaoDate, now)) {
-                includeTransaction = true;
-            } else if (period === 'week' && isSameWeek(transacaoDate, now)) {
-                includeTransaction = true;
-            } else if (period === 'month' && isSameMonth(transacaoDate, now)) {
-                includeTransaction = true;
-            } else if (period === 'total') {
-                includeTransaction = true;
-            }
-
-            if (includeTransaction) {
-                if (transacao.tipo === 'receita') {
-                    receitas += parseFloat(transacao.valor || 0);
-                } else if (transacao.tipo === 'despesa') {
-                    despesas += parseFloat(transacao.valor || 0);
-                }
-            }
-        });
-
-        res.json({ receitas: receitas.toFixed(2), despesas: despesas.toFixed(2) });
-
-    } catch (error) {
-        console.error('Erro ao gerar relatório financeiro:', error);
-        res.status(500).json({ message: 'Erro ao gerar relatório financeiro.' });
-    }
-});
-
-
+// Listener para iniciar o servidor
 app.listen(port, () => {
-    console.log(`Servidor backend rodando em http://localhost:${port}`);
-    console.log(`Acesse o frontend em http://localhost:${port}/dashboard.html (assumindo que dashboard.html está na pasta raiz do projeto)`);
+    console.log(`Servidor rodando em http://localhost:${port}`);
 });

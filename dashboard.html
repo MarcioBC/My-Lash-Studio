@@ -3,198 +3,609 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Dashboard Principal - Meu Estúdio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        /* Estilos gerais para o corpo */
         body {
-            font-family: sans-serif;
-            margin: auto;
-            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
             color: #333;
+            line-height: 1.6;
+            min-height: 100vh; /* Garante que o corpo ocupe toda a altura da viewport */
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            flex-direction: column; /* Para que o footer fixe embaixo */
         }
 
-        .container {
+        /* Estilos para o cabeçalho (onde o menu ficará) */
+        header {
+            background-color: #2c3e50; /* Cor de fundo escura para o cabeçalho */
+            color: white;
+            padding: 15px 30px; /* Ajustado para 30px nas laterais para melhor espaçamento */
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Sombra mais suave */
+            display: flex;
+            justify-content: space-between; /* Espaço entre o título e o menu */
+            align-items: center; /* Alinha verticalmente */
+            flex-wrap: wrap; /* Permite quebra de linha em telas menores */
+            position: sticky; /* Menu fixo no topo ao rolar */
+            top: 0;
+            z-index: 1000; /* Garante que fique acima de outros elementos */
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 26px; /* Ajustado para um tamanho consistente */
+            font-weight: 600;
+            color: #ffbbcd;
+        }
+
+        /* Estilos para a navegação (o menu em si) */
+        nav {
+            flex-grow: 1; /* Permite que a navegação ocupe espaço para empurrar os itens à direita */
+            text-align: right; /* Alinha o texto do nav para a direita */
+            margin-left: 20px; /* Espaço entre o título e o menu */
+        }
+
+        nav ul {
+            list-style: none; /* Remove os pontinhos da lista */
+            margin: 0;
+            padding: 0;
+            display: inline-flex; /* Para que a lista se ajuste ao conteúdo e vá para a direita */
+            flex-wrap: wrap;
+        }
+
+        /* Adicionado position: relative para os LIs que contêm submenu */
+        nav ul li {
+            position: relative;
+            margin: 0 18px; /* Espaçamento ajustado */
+        }
+
+        /* Estilos para links do menu pai */
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 0; /* Mais padding para links clicáveis */
+            transition: color 0.3s ease, transform 0.2s ease;
+            position: relative; /* Para o efeito de sublinhado */
+            display: block; /* Para que o padding e a largura do hover funcionem */
+        }
+
+        /* Efeito de sublinhado animado para links */
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #ffbbcd;
+            transition: width 0.3s ease;
+        }
+
+        nav ul li a:hover::after,
+        nav ul li a.active::after {
+            width: 100%;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            color: #ffbbcd;
+            transform: translateY(-2px); /* Pequeno efeito de levantamento */
+        }
+
+        /* Estilo para ícones dentro de links do menu - NOVO */
+        nav ul li a .fas,
+        nav ul li a .far,
+        nav ul li a .fal,
+        nav ul li a .fab {
+            margin-right: 5px; /* Espaço entre o ícone e o texto, se houver */
+            font-size: 1.1em; /* Ajusta o tamanho do ícone */
+        }
+
+        /* Para o ícone de casinha, se for só ele no link do dashboard - NOVO */
+        nav ul li a .fa-home {
+            font-size: 1.3em; /* Deixa o ícone de casinha um pouco maior e mais proeminente */
+            margin-right: 0; /* Remove margem se não houver texto ao lado */
+        }
+
+        /* Estilos para o SUBMENU */
+        .submenu {
+            display: none; /* Esconde o submenu por padrão */
+            position: absolute;
+            background-color: #3b506b; /* Cor de fundo do submenu */
+            min-width: 180px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            padding: 10px 0;
+            border-radius: 5px;
+            left: 50%; /* Centraliza o submenu sob o item pai */
+            transform: translateX(-50%);
+            top: 100%; /* Posiciona abaixo do item pai */
+            white-space: nowrap; /* Evita quebra de linha nos itens do submenu */
+        }
+
+        .submenu li {
+            margin: 0; /* Remove margem dos itens do submenu */
+        }
+
+        .submenu li a {
+            color: white;
+            padding: 12px 15px; /* Padding para itens do submenu */
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.2s ease;
+        }
+
+        /* CORRIGIDO: Cor de hover dos submenus para #ffccbd */
+        .submenu li a:hover {
+            background-color: #ffccbd; /* Nova cor de destaque no hover do submenu */
+            color: #2c3e50; /* Cor do texto no hover para contraste */
+        }
+
+        /* Mostrar o submenu ao passar o mouse sobre o LI PAI */
+        nav ul li:hover > .submenu {
+            display: block;
+        }
+
+        /* Estilos para o botão de Logout */
+        .logout-btn {
+            background-color: #dc3545; /* Vermelho */
+            color: white;
+            padding: 10px 20px; /* Padding maior */
+            border: none;
+            border-radius: 6px; /* Bordas mais suaves */
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-left: 25px; /* Espaçamento do menu */
+            flex-shrink: 0;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333; /* Vermelho mais escuro no hover */
+            transform: translateY(-2px);
+        }
+
+        /* Estilos para o conteúdo principal do dashboard */
+        .dashboard-content {
+            padding: 30px; /* Ajustado para 30px */
+            max-width: 95vw; /* Ocupa 95% da largura da viewport */
+            margin: 25px auto; /* Centraliza e mantém margem vertical */
+            background-color: #fff;
+            border-radius: 10px; /* Ajustado para 10px */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Sombra mais pronunciada */
+        }
+
+        .dashboard-content h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px; /* Ajustado margem */
+            font-size: 24px; /* Título um pouco maior */
+            position: relative; /* Necessário para a marca d'água */
+            z-index: 2; /* Garante que o texto fique acima da marca d'água */
+        }
+        
+        .dashboard-main-section-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('logo.png'); /* Caminho para sua logo */
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: contain; /* Ajusta a imagem para caber dentro do contêiner */
+            opacity: 0.03; /* Transparência bem suave (3%) */
+            z-index: 1; /* Coloca a marca d'água atrás do conteúdo */
+            pointer-events: none; /* Garante que a marca d'água não interfere com interações */
+        }
+
+        /* --- ESTILOS PARA OS CARDS DO DASHBOARD --- */
+        .dashboard-cards {
+            display: flex;
+            justify-content: center; /* Centraliza os itens horizontalmente */
+            gap: 40px; /* Espaço entre os cards */
+            margin-top: 30px;
+            margin-bottom: 40px; /* Aumentado para mais espaço */
+            flex-wrap: wrap; /* Permite quebra de linha em telas menores */
+            position: relative; /* Necessário para que os cards fiquem acima da marca d'água */
+            z-index: 2; /* Garante que os cards fiquem acima da marca d'água */
+        }
+
+        .card {
+            background-color: #f8f9fa; /* Fundo mais claro para os cards */
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            min-width: 250px;
+            max-width: 350px;
+            flex-basis: auto; /* Permite que o item se ajuste ao espaço disponível */
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .card p {
+            font-size: 2.2em; /* Tamanho maior para os números */
+            font-weight: 700;
+            color: #007bff; /* Azul para destaque dos números */
+            margin: 0;
+        }
+
+        /* Cores diferentes para os cards */
+        .card.clients p { color: #28a745; } /* Verde para clientes */
+        .card.appointments p { color: #4135e0; } /* Azul escuro para agendamentos */
+
+        /* Estilos para a seção de agendamentos do dia (exemplo) */
+        .today-appointments {
+            margin-top: 6px;
+            border-top: 1px solid #fff;
+            padding-top: 6px;
+        }
+
+        .today-appointments h3 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 24px; /* Ajustado para um pouco maior */
+            font-weight: 700; /* Negrito */
+        }
+
+        /* Reutiliza estilos da tabela de usuários para agendamentos */
+        .appointments-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             background-color: #fff;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            width: 90%;
-            max-width: 960px;
-            text-align: center;
+            overflow: hidden;
         }
 
-        h2 {
-            color: black;
-            margin-bottom: 30px;
-            font-size: 30px;
+        .appointments-table th, .appointments-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
         }
 
-        .modules-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .module-card {
+        .appointments-table th {
             background-color: #e9ecef;
-            border-radius: 6px;
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .appointments-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .appointments-table tbody tr:hover {
+            background-color: #e2e6ea;
+        }
+
+        /* Mensagem de nenhum agendamento */
+        #noAppointmentsMessage {
+            color: #666;
+            padding: 8px;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            margin-top: 15px;
+            background-color: #fefefe;
+            text-align: center;
+            display: none; /* Escondido por padrão, JavaScript o exibe */
+        }
+
+        /* Estilos para o rodapé */
+        footer {
+            margin-top: auto; /* Empurra o rodapé para baixo */
             padding: 20px;
             text-align: center;
-            position: relative; /* Para posicionar o submenu */
-            height: 240px; /* Nova propriedade para aumentar a altura */
-
-            display: flex; /* Ativa o Flexbox */
-            flex-direction: column; /* Organiza os itens em coluna */
-            justify-content: center; /* Centraliza verticalmente */
-            align-items: center; /* Centraliza horizontalmente */
-        }
-
-        .module-icon {
-            font-size: 2em;
-            color: #555;
-            margin-bottom: 10px;
-        }
-
-        .module-title {
-            font-size: 1.2em;
-            color: #333;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .module-description {
             color: #777;
             font-size: 0.9em;
-            margin-bottom: 15px;
+            background-color: #eef2f5; /* Fundo suave para o rodapé */
+            border-top: 1px solid #e0e0e0;
         }
 
-        .module-button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 16px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-            display: inline-block;
-            width: 80%; /* Ajustando a largura do botão principal */
-            margin-bottom: 10px; /* Espaço para o submenu */
+        /* Responsividade para telas menores */
+        @media (max-width: 900px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px 20px;
+            }
+            header h1 {
+                margin-bottom: 10px;
+                text-align: center;
+                width: 100%;
+            }
+            nav {
+                width: 100%;
+                margin-left: 0;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                display: flex;
+                width: 100%;
+            }
+            nav ul li {
+                margin: 5px 0;
+            }
+            .logout-btn {
+                margin-left: 0;
+                width: 100%;
+                text-align: center;
+                padding: 12px;
+            }
+
+            .dashboard-content {
+                padding: 20px;
+            }
+
+            .dashboard-cards {
+                flex-direction: column; /* Volta a empilhar em telas menores */
+                gap: 20px; /* Reduz o espaço */
+                align-items: center; /* Centraliza os cards */
+            }
+            .card {
+                width: 100%; /* Ocupa largura total disponível */
+                max-width: 350px; /* Mas não excede um tamanho razoável */
+            }
+
+            /* Submenu em telas menores */
+            .submenu {
+                position: static; /* Não flutua, fica no fluxo normal */
+                display: block !important; /* Força a exibição para que o hover no LI pai funcione */
+                width: 100%;
+                box-shadow: none;
+                padding: 0;
+                border-radius: 0;
+                background-color: #3b506b; /* Cor do fundo */
+            }
+            .submenu li a {
+                padding: 8px 30px; /* Indentação para submenu */
+                background-color: rgba(0,0,0,0.1); /* Fundo sutil */
+            }
+            .submenu li a:hover {
+                background-color: #ffccbd; /* Nova cor de destaque no hover do submenu */
+                color: #2c3e50; /* Cor do texto no hover para contraste */
+            }
+
+            .dashboard-main-section-wrapper::before {
+                background-size: contain; /* Garante que a logo caiba em telas menores */
+            }
         }
 
-        .module-button:hover {
-            background-color: #0056b3;
+        @media (max-width: 500px) {
+            .dashboard-content {
+                padding: 15px;
+            }
+            .dashboard-content h2 {
+                font-size: 1.8em;
+            }
+            .card h3 {
+                font-size: 1.2em;
+            }
+            .card p {
+                font-size: 1.8em;
+            }
+            .today-appointments h3 {
+                font-size: 1.5em;
+            }
+            .appointments-table th, .appointments-table td {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
         }
-
-        .submenu {
-            position: absolute;
-            top: 100%; /* Abaixo do botão principal */
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 10px 0;
-            width: 80%; /* Largura igual ao botão principal */
-            display: none; /* Inicialmente escondido */
-            z-index: 10; /* Para ficar acima de outros elementos */
-        }
-
-        .submenu a {
-            display: block;
-            padding: 8px 15px;
-            text-decoration: none;
-            color: #333;
-            transition: background-color 0.3s ease;
-            text-align: center;
-        }
-
-        .submenu a:hover {
-            background-color: #e9ecef;
-        }
-
-        .module-card:hover .submenu {
-            display: block;
-        }
-
-        .logout-button {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-            margin-top: 20px;
-        }
-
-        .logout-button:hover {
-            background-color: #c82333;
-        }
-
-        /* Estilos específicos para os ícones */
-        .icon-clientes::before { content: "👥"; }
-        .icon-agendamentos::before { content: "📅"; }
-        .icon-transacoes::before { content: "📊"; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Seu painel de controle</h2>
-        <div class="modules-grid">
-            <div class="module-card">
-                <div class="module-icon icon-clientes"></div>
-                <div class="module-title">Clientes</div>
-                <div class="module-description">Gerencie os dados dos clientes.</div>
-                <a href="clientes.html" class="module-button">Adicionar Cliente</a>
-                <div class="submenu">
-                    <a href="consultar_clientes.html">Consultar Clientes</a>
+
+    <header>
+        <h1>Studio JéMarqui</h1>
+        <nav>
+            <ul>
+                <li><a href="dashboard.html" class="active"><i class="fas fa-home"></i></a></li>
+
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Clientes</a>
+                    <ul class="submenu">
+                        <li><a href="clientes.html">Cadastrar Clientes</a></li>
+                        <li><a href="consultar_clientes.html">Consultar Clientes</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Agendamentos</a>
+                    <ul class="submenu">
+                        <li><a href="agendamentos.html">Novo Agendamento</a></li>
+                        <li><a href="agendamentos_lista.html">Lista de Agendamentos</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Transações</a>
+                    <ul class="submenu">
+                        <li><a href="transacoes.html">Livro Caixa</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Usuários</a>
+                    <ul class="submenu">
+                        <li><a href="usuarios.html">Gerenciar Usuários</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item-with-submenu">
+                    <a href="javascript:void(0);" onclick="toggleSubmenu(this)">Relatórios</a>
+                    <ul class="submenu">
+                        <li><a href="relatorios.html">Visualizar Relatórios</a></li>
+                    </ul>
+                </li>
+                <li><button class="logout-btn" onclick="logout()">Sair</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="dashboard-content">
+        <div class="dashboard-main-section-wrapper">
+            <h2>Visão Geral do Estúdio</h2>
+
+            <div class="dashboard-cards">
+                <div class="card clients">
+                    <h3>Total de Clientes</h3>
+                    <p id="totalClients">Carregando...</p>
                 </div>
-            </div>
-            <div class="module-card">
-                <div class="module-icon icon-agendamentos"></div>
-                <div class="module-title">Agendamentos</div>
-                <div class="module-description">Confira e organize os agendamentos.</div>
-                <a href="agendamentos.html" class="module-button">Novo Agendamento</a>
-                <div class="submenu">
-                    <a href="agendamentos_lista.html">Consultar Agendamentos</a>
-                    <a href="relatorios.html">Relatório de Agendamentos</a> 
+                <div class="card appointments">
+                    <h3>Agendamentos Hoje</h3>
+                    <p id="todayAppointmentsCount">Carregando...</p>
                 </div>
-            </div>
-            <div class="module-card">
-                <div class="module-icon icon-transacoes"></div>
-                <div class="module-title">Transações</div>
-                <div class="module-description">Acompanhe o fluxo financeiro.</div>
-                <button class="module-button" onclick="window.location.href='transacoes.html'">Meu Livro Caixa</button>
             </div>
         </div>
-        <button class="logout-button" id="logoutButton">Sair</button>
+        
+        <div class="today-appointments">
+            <h3>Próximos Agendamentos do Dia</h3>
+            <div id="todayAppointmentsList">
+                <table class="appointments-table">
+                    <thead>
+                        <tr>
+                            <th>Horário</th>
+                            <th>Cliente</th>
+                            <th>Procedimento(s)</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentsTableBody">
+                        <tr><td colspan="4" style="text-align: center; padding: 20px;">Carregando agendamentos...</td></tr>
+                    </tbody>
+                </table>
+                <p id="noAppointmentsMessage" style="text-align: center; margin-top: 15px; display: none;">Nenhum agendamento para hoje.</p>
+            </div>
+        </div>
     </div>
 
+    <footer>
+        <p>&copy; 2024 Meu Estúdio. Todos os direitos reservados.</p>
+    </footer>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const logoutButton = document.getElementById('logoutButton');
-
-            if (logoutButton) {
-                logoutButton.addEventListener('click', function() {
-                    // Limpar informações de autenticação do frontend (se houver)
-                    localStorage.removeItem('username');
-                    // sessionStorage.removeItem('token');
-
-                    // Redirecionar para a página de login
-                    window.location.href = 'login.html';
-                });
-            } else {
-                console.error('Botão "Sair" não encontrado no DOM.');
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchDashboardData();
         });
+
+        // Adicionado função para toggle de submenu (abrir/fechar no clique)
+        function toggleSubmenu(element) {
+            const submenu = element.nextElementSibling; // Pega o UL do submenu
+            if (submenu && submenu.classList.contains('submenu')) {
+                // Apenas para telas menores, o clique deve alternar a visibilidade
+                if (window.innerWidth <= 900) { 
+                    submenu.style.display = (submenu.style.display === 'block' || submenu.style.display === '') ? 'none' : 'block';
+                }
+            }
+        }
+
+        async function fetchDashboardData() {
+            const BASE_API_URL = 'http://localhost:3001/api';
+
+            // Fetch Total de Clientes
+            try {
+                const clientsResponse = await fetch(`${BASE_API_URL}/clients`);
+                if (!clientsResponse.ok) {
+                    const errorText = await clientsResponse.text();
+                    throw new Error(`Falha ao buscar clientes. Status: ${clientsResponse.status}. Resposta: ${errorText}`);
+                }
+                const clients = await clientsResponse.json();
+                document.getElementById('totalClients').textContent = clients.length;
+            } catch (error) {
+                console.error('Erro ao buscar total de clientes:', error);
+                document.getElementById('totalClients').textContent = 'Erro';
+            }
+
+            // Fetch Agendamentos Hoje e Próximos Agendamentos do Dia
+            try {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const todayFormatted = `${year}-${month}-${day}`;
+
+                const appointmentsResponse = await fetch(`${BASE_API_URL}/relatorios/agendamentos/dia?date=${todayFormatted}`);
+
+                if (!appointmentsResponse.ok) {
+                    const errorText = await appointmentsResponse.text();
+                    throw new Error(`Falha ao buscar agendamentos de hoje. Status: ${appointmentsResponse.status}. Resposta: ${errorText}`);
+                }
+                const appointments = await appointmentsResponse.json();
+                
+                document.getElementById('todayAppointmentsCount').textContent = appointments.length;
+                displayTodayAppointments(appointments); // Exibir na tabela
+            } catch (error) {
+                console.error('Erro ao buscar agendamentos de hoje ou próximos:', error);
+                document.getElementById('todayAppointmentsCount').textContent = 'Erro';
+                document.getElementById('appointmentsTableBody').innerHTML = '<tr><td colspan="4" style="text-align: center; color: red; padding: 20px;">Erro ao carregar agendamentos. Verifique o console para detalhes.</td></tr>';
+                document.getElementById('noAppointmentsMessage').style.display = 'none';
+            }
+            // Receita e Despesas do Mês foram removidos
+        }
+
+        function displayTodayAppointments(appointments) {
+            const appointmentsTableBody = document.getElementById('appointmentsTableBody');
+            const noAppointmentsMessage = document.getElementById('noAppointmentsMessage');
+
+            if (!appointmentsTableBody) return;
+
+            appointmentsTableBody.innerHTML = ''; // Limpa a tabela antes de preencher
+
+            if (appointments.length === 0) {
+                noAppointmentsMessage.style.display = 'block';
+                return;
+            } else {
+                noAppointmentsMessage.style.display = 'none';
+            }
+
+            // Ordena agendamentos por hora
+            appointments.sort((a, b) => {
+                const timeA = a.hora ? a.hora.split(':').map(Number) : [0, 0];
+                const timeB = b.hora ? b.hora.split(':').map(Number) : [0, 0];
+                if (timeA[0] !== timeB[0]) return timeA[0] - timeB[0];
+                return timeA[1] - timeB[1];
+            });
+
+            appointments.forEach(agendamento => {
+                const row = appointmentsTableBody.insertRow();
+                const horaFormatada = agendamento.hora || 'N/A';
+                const clienteNome = agendamento.clienteNome || 'Desconhecido';
+                const procedimentosTexto = Array.isArray(agendamento.procedimentosNomes) ? agendamento.procedimentosNomes.join(', ') : (agendamento.procedimentosNomes || 'N/A');
+                const valorTotal = parseFloat(agendamento.valorTotal || 0).toFixed(2).replace('.', ',');
+
+                row.insertCell().textContent = horaFormatada;
+                row.insertCell().textContent = clienteNome;
+                row.insertCell().textContent = procedimentosTexto;
+                row.insertCell().textContent = `R$ ${valorTotal}`;
+            });
+        }
+
+        // Função de logout (exemplo)
+        function logout() {
+            alert('Você foi desconectado!');
+            window.location.href = 'login.html';
+        }
     </script>
 </body>
 </html>
